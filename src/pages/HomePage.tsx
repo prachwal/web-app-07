@@ -1,12 +1,22 @@
+import { SkipLink } from '@/components/layout/SkipLink';
+import { Header } from '@/components/layout/Header';
+import { HeroSection } from '@/components/hero/HeroSection';
+import { Footer } from '@/components/layout/Footer';
+
 /**
- * Home page — renders the application hero section.
+ * Home page — full layout with skip link, header, hero section, and footer.
  *
  * @returns The home page element
  */
 export function HomePage(): React.JSX.Element {
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <h1 className="p-8 text-4xl font-bold">Home</h1>
-    </main>
+    <>
+      <SkipLink />
+      <Header />
+      <main id="main-content" tabIndex={-1}>
+        <HeroSection />
+      </main>
+      <Footer />
+    </>
   );
 }
