@@ -1,0 +1,27 @@
+{
+  "heading": "Zbuduj coś wyjątkowego",
+  "subheading": "Nowoczesna aplikacja React z TypeScript, Tailwind i premium doświadczeniem dewelopera.",
+  "badge": "Nowe wydanie",
+  "cta": {
+    "primary": "Zacznij teraz",
+    "secondary": "Zobacz na GitHub"
+  },
+  "emailForm": {
+    "label": "Adres email",
+    "placeholder": "ty@przykład.pl",
+    "submit": "Powiadom mnie",
+    "success": "Jesteś na liście! Skontaktujemy się wkrótce.",
+    "error": {
+      "required": "Adres email jest wymagany.",
+      "invalid": "Podaj prawidłowy adres email."
+    }
+  },
+  "features": {
+    "title": "Wszystko czego potrzebujesz",
+    "items": [
+      { "title": "Typowany", "description": "Pełne pokrycie TypeScriptem w trybie strict." },
+      { "title": "Dostępny", "description": "Zgodny z WCAG AA i dobrymi praktykami ARIA." },
+      { "title": "Motywowalny", "description": "Tryb ciemny i jasny sterowany przez Redux." }
+    ]
+  }
+}

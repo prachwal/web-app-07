@@ -1,0 +1,27 @@
+{
+  "heading": "Build something remarkable",
+  "subheading": "A modern React application with TypeScript, Tailwind, and a premium developer experience.",
+  "badge": "New Release",
+  "cta": {
+    "primary": "Get Started",
+    "secondary": "View on GitHub"
+  },
+  "emailForm": {
+    "label": "Email address",
+    "placeholder": "you@example.com",
+    "submit": "Notify Me",
+    "success": "You're on the list! We'll be in touch.",
+    "error": {
+      "required": "Email address is required.",
+      "invalid": "Please enter a valid email address."
+    }
+  },
+  "features": {
+    "title": "Everything you need",
+    "items": [
+      { "title": "Type Safe", "description": "Full TypeScript coverage with strict mode." },
+      { "title": "Accessible", "description": "WCAG AA compliant with ARIA best practices." },
+      { "title": "Themeable", "description": "Dark and light modes powered by Redux." }
+    ]
+  }
+}
