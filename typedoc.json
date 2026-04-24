@@ -1,0 +1,17 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src"],
+  "entryPointStrategy": "expand",
+  "out": "artifacts/docs",
+  "plugin": ["typedoc-plugin-markdown"],
+  "excludeInternal": true,
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "readme": "none",
+  "validation": {
+    "notDocumented": true,
+    "invalidLink": true
+  },
+  "treatWarningsAsErrors": false,
+  "skipErrorChecking": false
+}
