@@ -20,6 +20,11 @@
   "keywords": [],
   "author": "Przemysław Rachwał <przemyslaw.rachwal@gmail.com>",
   "license": "MIT",
+  "homepage": "https://web-app-07.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prachwal/web-app-07.git"
+  },
   "packageManager": "pnpm@10.33.0",
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
