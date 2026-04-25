@@ -45,7 +45,14 @@
     "dateRange": "Date range (max 93 days)",
     "periodError": "The range cannot exceed 93 days.",
     "viewChart": "Show chart",
-    "viewGrid": "Show table"
+    "viewGrid": "Show table",
+    "viewTiles": "Show tiles",
+    "viewMode": "View mode"
+  },
+  "tiles": {
+    "addFavorite": "Add {{code}} to favourites",
+    "removeFavorite": "Remove {{code}} from favourites",
+    "showChart": "Chart"
   },
   "chart": {
     "heading": "Exchange rate chart",

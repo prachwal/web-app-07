@@ -1,10 +1,11 @@
-import { useState, useTransition, useDeferredValue, useMemo, useCallback } from 'react';
+import { useState, useEffect, useTransition, useDeferredValue, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'motion/react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { NbpFilters } from '@/components/nbp/NbpFilters';
 import { NbpGrid } from '@/components/nbp/NbpGrid';
+import { NbpTiles } from '@/components/nbp/NbpTiles';
 import { NbpChart, type ChartPoint } from '@/components/nbp/NbpChart';
 import { NbpDetails, type NbpSelection } from '@/components/nbp/NbpDetails';
 import {
@@ -35,6 +36,32 @@ function today(): string {
 /** Valid NbpTab values used to sanitise the URL `tab` param. */
 const VALID_TABS: NbpTab[] = ['A', 'B', 'C', 'gold'];
 
+const VALID_VIEWS = ['grid', 'chart', 'tiles'] as const;
+type ViewMode = (typeof VALID_VIEWS)[number];
+
+const LS_VIEW_KEY = 'nbp:view';
+const LS_FAVORITES_KEY = 'nbp:favorites';
+
+/** Read a value from localStorage safely. Returns null on SSR or parse errors. */
+function lsGet<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw === null) return null;
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
+
+/** Write a value to localStorage safely. */
+function lsSet(key: string, value: unknown): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // quota exceeded or private mode — ignore
+  }
+}
+
 /**
  * NBP Exchange Rates page.
  *
@@ -63,7 +90,12 @@ export function NbpPage(): React.JSX.Element {
   /* ── URL-derived state (URL is the single source of truth for filters) ── */
   const tabParam = searchParams.get('tab');
   const tab: NbpTab = VALID_TABS.includes(tabParam as NbpTab) ? (tabParam as NbpTab) : 'A';
-  const viewMode: 'grid' | 'chart' = searchParams.get('view') === 'chart' ? 'chart' : 'grid';
+
+  const rawView = searchParams.get('view');
+  const viewMode: ViewMode = VALID_VIEWS.includes(rawView as ViewMode)
+    ? (rawView as ViewMode)
+    : 'grid';
+
   const chartCode = searchParams.get('code') ?? '';
   const startDate = searchParams.get('start') ?? daysAgo(30);
   const endDate = searchParams.get('end') ?? today();
@@ -74,6 +106,26 @@ export function NbpPage(): React.JSX.Element {
   const deferredSearch = useDeferredValue(search);
   const [selection, setSelection] = useState<NbpSelection | null>(null);
 
+  /* ── favorites (localStorage-persisted) ── */
+  const [favorites, setFavorites] = useState<string[]>(() => lsGet<string[]>(LS_FAVORITES_KEY) ?? []);
+
+  const toggleFavorite = useCallback((code: string) => {
+    setFavorites((prev) => {
+      const next = prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code];
+      lsSet(LS_FAVORITES_KEY, next);
+      return next;
+    });
+  }, []);
+
+  /* ── pagination per view (grid and tiles separate) ── */
+  const [gridPage, setGridPage] = useState(1);
+  const [tilesPage, setTilesPage] = useState(1);
+
+  /* ── persist view preference to localStorage on change ── */
+  useEffect(() => {
+    lsSet(LS_VIEW_KEY, viewMode);
+  }, [viewMode]);
+
   /* ── URL updater — merges partial key/value updates into existing params ── */
   const updateParams = useCallback(
     (updates: Record<string, string>) => {
@@ -83,6 +135,13 @@ export function NbpPage(): React.JSX.Element {
           for (const [k, v] of Object.entries(updates)) {
             if (v) next.set(k, v);
             else next.delete(k);
+          }
+          // Remove date params when they are not meaningful (grid/tiles view + not gold)
+          const nextView = next.get('view') ?? 'grid';
+          const nextTab = next.get('tab') ?? 'A';
+          if (nextView !== 'chart' && nextTab !== 'gold') {
+            next.delete('start');
+            next.delete('end');
           }
           return next;
         },
@@ -178,12 +237,15 @@ export function NbpPage(): React.JSX.Element {
     setSelection(null);
   };
 
-  const handleViewModeChange = (mode: 'grid' | 'chart') => {
+  const handleViewModeChange = (mode: ViewMode) => {
     const updates: Record<string, string> = { view: mode };
     // Auto-select the first available currency when switching to chart mode with no code set
     if (mode === 'chart' && !chartCode && availableCodes.length > 0) {
       updates.code = availableCodes[0];
     }
+    // Reset pagination when switching views
+    setGridPage(1);
+    setTilesPage(1);
     updateParams(updates);
     setSelection(null);
   };
@@ -261,6 +323,7 @@ export function NbpPage(): React.JSX.Element {
     selection?.type === 'gold' ? selection.goldPrice.data : null;
 
   const showChart = viewMode === 'chart';
+  const showTiles = viewMode === 'tiles';
 
   /** Table entry for the active tab — used for the description bar. */
   const activeEntry = tab === 'C' ? tableCEntry : tab === 'gold' ? null : tableEntry;
@@ -322,7 +385,32 @@ export function NbpPage(): React.JSX.Element {
           </div>
 
           {/* Main content */}
-          {!showChart ? (
+          {showChart ? (
+            /* Chart view */
+            <NbpChart
+              data={chartData}
+              isLoading={chartIsLoading}
+              tab={tab}
+              currency={chartCode || (tab === 'gold' ? '' : '')}
+            />
+          ) : showTiles ? (
+            /* Tiles (kafelki) view */
+            <NbpTiles
+              tab={tab}
+              rates={tab === 'C' ? [] : filteredRates}
+              ratesC={tab === 'C' ? (tableCEntry?.rates ?? []) : []}
+              goldPrices={goldPrices}
+              isLoading={activeIsLoading}
+              isFetching={activeIsFetching}
+              error={activeError}
+              favorites={favorites}
+              onToggleFavorite={toggleFavorite}
+              onViewChart={tab !== 'gold' ? handleViewChart : undefined}
+              onRetry={handleRetry}
+              page={tilesPage}
+              onPageChange={setTilesPage}
+            />
+          ) : (
             /* Grid + details side-panel */
             <div
               className={`grid gap-6 ${selection ? 'lg:grid-cols-[1fr_280px]' : 'grid-cols-1'}`}
@@ -341,18 +429,14 @@ export function NbpPage(): React.JSX.Element {
                 onGoldSelect={handleGoldSelect}
                 onRetry={handleRetry}
                 onViewChart={tab !== 'gold' ? handleViewChart : undefined}
+                favorites={favorites}
+                onToggleFavorite={toggleFavorite}
+                page={gridPage}
+                onPageChange={setGridPage}
               />
 
               <NbpDetails selection={selection} onClose={() => setSelection(null)} />
             </div>
-          ) : (
-            /* Chart view */
-            <NbpChart
-              data={chartData}
-              isLoading={chartIsLoading}
-              tab={tab}
-              currency={chartCode || (tab === 'gold' ? '' : '')}
-            />
           )}
         </motion.div>
       </div>

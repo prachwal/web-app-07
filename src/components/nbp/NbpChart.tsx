@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useReducedMotion } from 'motion/react';
 import {
@@ -61,6 +62,32 @@ export function NbpChart({ data, isLoading, tab, currency = '' }: NbpChartProps)
       ? `${t('chart.heading')} — ${t('chart.axisGold')}`
       : `${t('chart.heading')} — ${currency}`;
 
+  /* ── auto-scale Y domain for better visualization ── */
+  const yDomain = useMemo<[number, number] | undefined>(() => {
+    let values: number[] = [];
+    if (tab === 'A' || tab === 'B') {
+      values = data.map((d) => d.mid).filter((v): v is number => v != null && isFinite(v));
+    } else if (tab === 'C') {
+      values = [
+        ...data.map((d) => d.bid).filter((v): v is number => v != null && isFinite(v)),
+        ...data.map((d) => d.ask).filter((v): v is number => v != null && isFinite(v)),
+      ];
+    } else {
+      // gold
+      values = data.map((d) => d.cena).filter((v): v is number => v != null && isFinite(v));
+    }
+
+    if (values.length === 0) return undefined;
+
+    const rawMin = Math.min(...values);
+    const rawMax = Math.max(...values);
+    const span = rawMax - rawMin;
+
+    // For a flat line (span === 0) use ±0.5% of the value, with 0 protected against zero-divide
+    const padding = span === 0 ? Math.max(Math.abs(rawMin) * 0.005, 0.0001) : span * 0.06;
+    return [rawMin - padding, rawMax + padding];
+  }, [data, tab]);
+
   /* ── loading skeleton ── */
   if (isLoading) {
     return (
@@ -118,6 +145,7 @@ export function NbpChart({ data, isLoading, tab, currency = '' }: NbpChartProps)
             }}
           />
           <YAxis
+            domain={yDomain}
             tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
             axisLine={{ stroke: 'hsl(var(--border))' }}
             tickLine={false}

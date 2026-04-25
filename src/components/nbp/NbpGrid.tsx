@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, RefreshCw, BarChart2 } from 'lucide-react';
+import { AlertCircle, RefreshCw, BarChart2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Pagination } from '@/components/ui/Pagination';
 import type { NbpRate, NbpRateC, NbpGoldPrice, NbpTab } from '@/store/api/nbpApi';
 
 const SKELETON_ROWS = 8;
+const PAGE_SIZE = 20;
 
 /** Props for the {@link NbpGrid} component. */
 export interface NbpGridProps {
@@ -36,6 +38,14 @@ export interface NbpGridProps {
    * When provided, a small chart icon appears on hover for each currency row.
    */
   onViewChart?: (code: string) => void;
+  /** Set of favourite currency codes / gold dates. */
+  favorites?: string[];
+  /** Callback fired when the user toggles a favourite. */
+  onToggleFavorite?: (code: string) => void;
+  /** Current pagination page (1-based). */
+  page?: number;
+  /** Callback fired when the user changes the page. */
+  onPageChange?: (page: number) => void;
 }
 
 function SkeletonRow({ cols }: { cols: number }): React.JSX.Element {
@@ -76,12 +86,45 @@ export function NbpGrid({
   onGoldSelect,
   onRetry,
   onViewChart,
+  favorites = [],
+  onToggleFavorite,
+  page = 1,
+  onPageChange,
 }: NbpGridProps): React.JSX.Element {
   const { t } = useTranslation('nbp');
   const isGold = tab === 'gold';
   const isTableC = tab === 'C';
   const cols = isGold ? 2 : isTableC ? 4 : 3;
   const hasData = isGold ? goldPrices.length > 0 : isTableC ? ratesC.length > 0 : rates.length > 0;
+
+  /* ── sort: favourites first ── */
+  const sortedRates = [...rates].sort((a, b) => {
+    const aFav = favorites.includes(a.code) ? 0 : 1;
+    const bFav = favorites.includes(b.code) ? 0 : 1;
+    return aFav - bFav;
+  });
+
+  const sortedRatesC = [...ratesC].sort((a, b) => {
+    const aFav = favorites.includes(a.code) ? 0 : 1;
+    const bFav = favorites.includes(b.code) ? 0 : 1;
+    return aFav - bFav;
+  });
+
+  const sortedGold = [...goldPrices].sort((a, b) => {
+    const aFav = favorites.includes(a.data) ? 0 : 1;
+    const bFav = favorites.includes(b.data) ? 0 : 1;
+    return aFav - bFav;
+  });
+
+  /* ── pagination ── */
+  const totalItems = isGold ? sortedGold.length : isTableC ? sortedRatesC.length : sortedRates.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const offset = (safePage - 1) * PAGE_SIZE;
+
+  const pageRates = sortedRates.slice(offset, offset + PAGE_SIZE);
+  const pageRatesC = sortedRatesC.slice(offset, offset + PAGE_SIZE);
+  const pageGold = sortedGold.slice(offset, offset + PAGE_SIZE);
 
   /* ── error state ── */
   if (error) {
@@ -174,112 +217,174 @@ export function NbpGrid({
             {/* gold price rows */}
             {!isLoading &&
               isGold &&
-              goldPrices.map((entry) => (
-                <tr
-                  key={entry.data}
-                  onClick={() => onGoldSelect(entry)}
-                  onKeyDown={(e) => e.key === 'Enter' && onGoldSelect(entry)}
-                  role="row"
-                  tabIndex={0}
-                  aria-selected={selectedGoldDate === entry.data}
-                  className={cn(
-                    'cursor-pointer transition-colors hover:bg-muted/50',
-                    'focus-visible:outline-none focus-visible:bg-muted/50',
-                    selectedGoldDate === entry.data && 'bg-primary/5',
-                  )}
-                >
-                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                    {entry.data}
-                  </td>
-                  <td className="px-4 py-3 text-right font-medium tabular-nums">
-                    {entry.cena.toFixed(2)}
-                  </td>
-                </tr>
-              ))}
+              pageGold.map((entry) => {
+                const isFav = favorites.includes(entry.data);
+                return (
+                  <tr
+                    key={entry.data}
+                    onClick={() => onGoldSelect(entry)}
+                    onKeyDown={(e) => e.key === 'Enter' && onGoldSelect(entry)}
+                    role="row"
+                    tabIndex={0}
+                    aria-selected={selectedGoldDate === entry.data}
+                    className={cn(
+                      'group cursor-pointer transition-colors hover:bg-muted/50',
+                      'focus-visible:outline-none focus-visible:bg-muted/50',
+                      selectedGoldDate === entry.data && 'bg-primary/5',
+                    )}
+                  >
+                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        {entry.data}
+                        {onToggleFavorite && (
+                          <button
+                            type="button"
+                            aria-pressed={isFav}
+                            aria-label={isFav ? t('tiles.removeFavorite', { code: entry.data }) : t('tiles.addFavorite', { code: entry.data })}
+                            onClick={(e) => { e.stopPropagation(); onToggleFavorite(entry.data); }}
+                            className={cn(
+                              'rounded p-0.5 transition-colors',
+                              'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                              isFav
+                                ? 'text-amber-500 opacity-100'
+                                : 'text-muted-foreground opacity-0 group-hover:opacity-100',
+                            )}
+                          >
+                            <Star size={11} fill={isFav ? 'currentColor' : 'none'} aria-hidden="true" />
+                          </button>
+                        )}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right font-medium tabular-nums">
+                      {entry.cena.toFixed(2)}
+                    </td>
+                  </tr>
+                );
+              })}
 
             {/* exchange rate rows (A / B) */}
             {!isLoading &&
               !isGold &&
               !isTableC &&
-              rates.map((rate) => (
-                <tr
-                  key={rate.code}
-                  onClick={() => onRateSelect(rate)}
-                  onKeyDown={(e) => e.key === 'Enter' && onRateSelect(rate)}
-                  role="row"
-                  tabIndex={0}
-                  aria-selected={selectedCode === rate.code}
-                  className={cn(
-                    'group cursor-pointer transition-colors hover:bg-muted/50',
-                    'focus-visible:outline-none focus-visible:bg-muted/50',
-                    selectedCode === rate.code && 'bg-primary/5',
-                  )}
-                >
-                  <td className="px-4 py-3 font-mono text-xs font-semibold text-foreground">
-                    <span className="flex items-center gap-1">
-                      {rate.code}
-                      {onViewChart && (
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); onViewChart(rate.code); }}
-                          aria-label={t('grid.chartFor', { code: rate.code })}
-                          title={t('grid.chartFor', { code: rate.code })}
-                          className={cn(
-                            'rounded p-0.5 text-muted-foreground opacity-0 transition-opacity',
-                            'hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                            'group-hover:opacity-100',
-                          )}
-                        >
-                          <BarChart2 size={12} aria-hidden="true" />
-                        </button>
-                      )}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">{rate.currency}</td>
-                  <td className="px-4 py-3 text-right font-medium tabular-nums">
-                    {rate.mid.toFixed(4)}
-                  </td>
-                </tr>
-              ))}
+              pageRates.map((rate) => {
+                const isFav = favorites.includes(rate.code);
+                return (
+                  <tr
+                    key={rate.code}
+                    onClick={() => onRateSelect(rate)}
+                    onKeyDown={(e) => e.key === 'Enter' && onRateSelect(rate)}
+                    role="row"
+                    tabIndex={0}
+                    aria-selected={selectedCode === rate.code}
+                    className={cn(
+                      'group cursor-pointer transition-colors hover:bg-muted/50',
+                      'focus-visible:outline-none focus-visible:bg-muted/50',
+                      selectedCode === rate.code && 'bg-primary/5',
+                    )}
+                  >
+                    <td className="px-4 py-3 font-mono text-xs font-semibold text-foreground">
+                      <span className="flex items-center gap-2">
+                        {rate.code}
+                        {onToggleFavorite && (
+                          <button
+                            type="button"
+                            aria-pressed={isFav}
+                            aria-label={isFav ? t('tiles.removeFavorite', { code: rate.code }) : t('tiles.addFavorite', { code: rate.code })}
+                            onClick={(e) => { e.stopPropagation(); onToggleFavorite(rate.code); }}
+                            className={cn(
+                              'rounded p-0.5 transition-colors',
+                              'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                              isFav
+                                ? 'text-amber-500 opacity-100'
+                                : 'text-muted-foreground opacity-0 group-hover:opacity-100',
+                            )}
+                          >
+                            <Star size={11} fill={isFav ? 'currentColor' : 'none'} aria-hidden="true" />
+                          </button>
+                        )}
+                        {onViewChart && (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); onViewChart(rate.code); }}
+                            aria-label={t('grid.chartFor', { code: rate.code })}
+                            title={t('grid.chartFor', { code: rate.code })}
+                            className={cn(
+                              'rounded p-0.5 text-muted-foreground opacity-0 transition-opacity',
+                              'hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                              'group-hover:opacity-100',
+                            )}
+                          >
+                            <BarChart2 size={12} aria-hidden="true" />
+                          </button>
+                        )}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{rate.currency}</td>
+                    <td className="px-4 py-3 text-right font-medium tabular-nums">
+                      {rate.mid.toFixed(4)}
+                    </td>
+                  </tr>
+                );
+              })}
 
             {/* exchange rate rows (C — bid/ask) */}
             {!isLoading &&
               isTableC &&
-              ratesC.map((rate) => (
-                <tr
-                  key={rate.code}
-                  role="row"
-                  className="group transition-colors hover:bg-muted/50"
-                >
-                  <td className="px-4 py-3 font-mono text-xs font-semibold text-foreground">
-                    <span className="flex items-center gap-1">
-                      {rate.code}
-                      {onViewChart && (
-                        <button
-                          type="button"
-                          onClick={() => onViewChart(rate.code)}
-                          aria-label={t('grid.chartFor', { code: rate.code })}
-                          title={t('grid.chartFor', { code: rate.code })}
-                          className={cn(
-                            'rounded p-0.5 text-muted-foreground opacity-0 transition-opacity',
-                            'hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                            'group-hover:opacity-100',
-                          )}
-                        >
-                          <BarChart2 size={12} aria-hidden="true" />
-                        </button>
-                      )}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">{rate.currency}</td>
-                  <td className="px-4 py-3 text-right font-medium tabular-nums">
-                    {rate.bid.toFixed(4)}
-                  </td>
-                  <td className="px-4 py-3 text-right font-medium tabular-nums">
-                    {rate.ask.toFixed(4)}
-                  </td>
-                </tr>
-              ))}
+              pageRatesC.map((rate) => {
+                const isFav = favorites.includes(rate.code);
+                return (
+                  <tr
+                    key={rate.code}
+                    role="row"
+                    className="group transition-colors hover:bg-muted/50"
+                  >
+                    <td className="px-4 py-3 font-mono text-xs font-semibold text-foreground">
+                      <span className="flex items-center gap-2">
+                        {rate.code}
+                        {onToggleFavorite && (
+                          <button
+                            type="button"
+                            aria-pressed={isFav}
+                            aria-label={isFav ? t('tiles.removeFavorite', { code: rate.code }) : t('tiles.addFavorite', { code: rate.code })}
+                            onClick={() => onToggleFavorite(rate.code)}
+                            className={cn(
+                              'rounded p-0.5 transition-colors',
+                              'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                              isFav
+                                ? 'text-amber-500 opacity-100'
+                                : 'text-muted-foreground opacity-0 group-hover:opacity-100',
+                            )}
+                          >
+                            <Star size={11} fill={isFav ? 'currentColor' : 'none'} aria-hidden="true" />
+                          </button>
+                        )}
+                        {onViewChart && (
+                          <button
+                            type="button"
+                            onClick={() => onViewChart(rate.code)}
+                            aria-label={t('grid.chartFor', { code: rate.code })}
+                            title={t('grid.chartFor', { code: rate.code })}
+                            className={cn(
+                              'rounded p-0.5 text-muted-foreground opacity-0 transition-opacity',
+                              'hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                              'group-hover:opacity-100',
+                            )}
+                          >
+                            <BarChart2 size={12} aria-hidden="true" />
+                          </button>
+                        )}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{rate.currency}</td>
+                    <td className="px-4 py-3 text-right font-medium tabular-nums">
+                      {rate.bid.toFixed(4)}
+                    </td>
+                    <td className="px-4 py-3 text-right font-medium tabular-nums">
+                      {rate.ask.toFixed(4)}
+                    </td>
+                  </tr>
+                );
+              })}
 
             {/* empty state */}
             {!isLoading && !hasData && (
@@ -292,6 +397,15 @@ export function NbpGrid({
           </tbody>
         </table>
       </div>
+
+      {onPageChange && (
+        <Pagination
+          page={safePage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          className="mt-4"
+        />
+      )}
     </div>
   );
 }

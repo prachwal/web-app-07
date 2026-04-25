@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Search, X, BarChart2, TableProperties } from 'lucide-react';
+import { Search, X, BarChart2, TableProperties, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { NbpTab } from '@/store/api/nbpApi';
 
@@ -32,10 +32,10 @@ export interface NbpFiltersProps {
   onClear: () => void;
   /** Whether a tab transition is pending (React `useTransition`). */
   isPending?: boolean;
-  /** Current view mode — grid table or line chart. */
-  viewMode: 'grid' | 'chart';
+  /** Current view mode — grid table, tile cards, or line chart. */
+  viewMode: 'grid' | 'chart' | 'tiles';
   /** Callback fired when the user toggles the view mode. */
-  onViewModeChange: (mode: 'grid' | 'chart') => void;
+  onViewModeChange: (mode: 'grid' | 'chart' | 'tiles') => void;
   /** Currency code for the historical series chart (e.g. "USD"). */
   chartCode: string;
   /** Callback fired when the chart currency code changes. */
@@ -78,8 +78,6 @@ export function NbpFilters({
   availableCodes = [],
 }: NbpFiltersProps): React.JSX.Element {
   const { t } = useTranslation('nbp');
-  const showChart = viewMode === 'chart';
-
   return (
     <div className="flex flex-col gap-4">
       {/* ── Tab selector ── */}
@@ -112,22 +110,22 @@ export function NbpFilters({
           ))}
         </div>
 
-        {/* ── View mode toggle (grid / chart) ── */}
+        {/* ── View mode toggle (grid / tiles / chart) ── */}
         {(
           <div
             role="group"
-            aria-label={showChart ? t('series.viewGrid') : t('series.viewChart')}
+            aria-label={t('series.viewMode')}
             className="flex gap-1 rounded-lg border border-border bg-muted/40 p-1"
           >
             <button
               type="button"
-              aria-pressed={!showChart}
+              aria-pressed={viewMode === 'grid'}
               onClick={() => onViewModeChange('grid')}
               title={t('series.viewGrid')}
               aria-label={t('series.viewGrid')}
               className={cn(
                 'rounded-md p-2 transition-colors',
-                !showChart
+                viewMode === 'grid'
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground',
               )}
@@ -136,13 +134,28 @@ export function NbpFilters({
             </button>
             <button
               type="button"
-              aria-pressed={showChart}
+              aria-pressed={viewMode === 'tiles'}
+              onClick={() => onViewModeChange('tiles')}
+              title={t('series.viewTiles')}
+              aria-label={t('series.viewTiles')}
+              className={cn(
+                'rounded-md p-2 transition-colors',
+                viewMode === 'tiles'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              <LayoutGrid size={16} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-pressed={viewMode === 'chart'}
               onClick={() => onViewModeChange('chart')}
               title={t('series.viewChart')}
               aria-label={t('series.viewChart')}
               className={cn(
                 'rounded-md p-2 transition-colors',
-                showChart
+                viewMode === 'chart'
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground',
               )}
@@ -153,8 +166,8 @@ export function NbpFilters({
         )}
       </div>
 
-      {/* ── Search input — grid mode for A / B / C ── */}
-      {tab !== 'gold' && !showChart && (
+      {/* ── Search input — grid/tiles mode for A / B / C ── */}
+      {tab !== 'gold' && viewMode !== 'chart' && (
         <div className="relative">
           <Search
             size={16}
@@ -177,7 +190,7 @@ export function NbpFilters({
       )}
 
       {/* ── Chart controls — currency code + date range for A / B / C ── */}
-      {tab !== 'gold' && showChart && (
+      {tab !== 'gold' && viewMode === 'chart' && (
         <div className="flex flex-wrap items-end gap-3">
           {/* Currency code input */}
           <label className="flex flex-col gap-1">

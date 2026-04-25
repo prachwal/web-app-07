@@ -45,7 +45,14 @@
     "dateRange": "Zakres dat (maks. 93 dni)",
     "periodError": "Zakres nie może przekraczać 93 dni.",
     "viewChart": "Pokaż wykres",
-    "viewGrid": "Pokaż tabelę"
+    "viewGrid": "Pokaż tabelę",
+    "viewTiles": "Pokaż kafelki",
+    "viewMode": "Tryb widoku"
+  },
+  "tiles": {
+    "addFavorite": "Dodaj {{code}} do ulubionych",
+    "removeFavorite": "Usuń {{code}} z ulubionych",
+    "showChart": "Wykres"
   },
   "chart": {
     "heading": "Wykres kursu waluty",
