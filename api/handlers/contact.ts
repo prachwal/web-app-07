@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { type ContactRequest, type ContactResponse } from '../../packages/shared/src/contact.js';
+import { logError, getLogger } from '../_lib/logger.js';
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 5;
@@ -70,12 +71,7 @@ async function submitMessage(data: ContactRequest): Promise<string> {
   await new Promise((resolve) => setTimeout(resolve, 80));
 
   const id = `msg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  console.log('[contact] message accepted', {
-    id,
-    name: data.name,
-    email: data.email,
-    subject: data.subject,
-  });
+  getLogger().info('contact message accepted', { id, name: data.name, subject: data.subject });
   return id;
 }
 
@@ -132,7 +128,7 @@ contactRoute.post('/', async (c) => {
       200,
     );
   } catch (error) {
-    console.error('[contact] unexpected error', error);
+    logError('contactRoute.post failed', error);
     return c.json(
       {
         ok: false,

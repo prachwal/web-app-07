@@ -1,18 +1,25 @@
 import { Hono } from 'hono';
 import { helloHandler } from './handlers/hello.js';
+import { healthHandler } from './handlers/health.js';
 import { contactRoute } from './handlers/contact.js';
 
 export const config = { runtime: 'nodejs' };
 
-// basePath('/api') so routes match the incoming URL /api/hello, /api/contact
-const app = new Hono().basePath('/api');
+// basePath('/api') so routes match the incoming URL /api/hello, /api/health, /api/contact
+export const app = new Hono().basePath('/api');
 
 app.onError((err, c) => {
-  console.error('[API] Hono error:', err instanceof Error ? err.message : err);
+  if (err instanceof Error) {
+    console.error('[API] Hono error:', err.message);
+    console.error(err.stack);
+  } else {
+    console.error('[API] Hono error:', err);
+  }
   return c.json({ ok: false, message: err instanceof Error ? err.message : 'Internal error' }, 500);
 });
 
 app.get('/hello', helloHandler);
+app.get('/health', healthHandler);
 app.route('/contact', contactRoute);
 
 // Named `fetch` export — @vercel/node v5 resolves via
