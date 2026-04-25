@@ -32,7 +32,7 @@ export function HeroActions(): React.JSX.Element {
     resolver: zodResolver(emailSchema),
   });
 
-  const onSubmit = async (_data: EmailFormValues) => {
+  const onSubmit = async (_data: EmailFormValues): Promise<void> => {
     await new Promise<void>((resolve) => setTimeout(resolve, 800));
     setSubmitted(true);
   };
@@ -93,7 +93,7 @@ export function HeroActions(): React.JSX.Element {
           </p>
         ) : (
           <form
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={(e) => { void handleSubmit(onSubmit)(e); }}
             noValidate
             aria-label="Email notification signup"
           >

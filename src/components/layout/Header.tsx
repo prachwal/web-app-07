@@ -47,7 +47,7 @@ export function Header(): React.JSX.Element {
         </a>
 
         <nav role="navigation" aria-label={t('a11y.openMenu')}>
-          <ul className="hidden gap-6 sm:flex" role="list">
+          <ul className="hidden gap-6 sm:flex">
             {(['home', 'about', 'contact'] as const).map((key) => (
               <li key={key}>
                 <a

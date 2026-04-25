@@ -56,7 +56,7 @@ function TestProviders({ children, store, initialPath = '/' }: TestProviderProps
  *
  * @param ui - React element to render
  * @param options - Render options including store and initial path
- * @returns All utilities from @testing-library/react
+ * @returns All utilities from \@testing-library/react
  *
  * @example
  * ```tsx
