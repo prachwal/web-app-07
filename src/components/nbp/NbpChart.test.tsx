@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { screen } from '@testing-library/react';
 import { renderWithProviders } from '@/test/utils';
-import { NbpChart } from '@/components/nbp/NbpChart';
-import type { ChartPoint } from '@/components/nbp/NbpChart';
+import { NbpChart } from '@/components/nbp/chart/NbpChart';
+import type { ChartPoint } from '@/components/nbp/chart/NbpChart';
 
 /* ── recharts requires ResizeObserver and SVG layout APIs not in jsdom ── */
 beforeAll(() => {

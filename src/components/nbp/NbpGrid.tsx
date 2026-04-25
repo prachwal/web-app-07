@@ -5,7 +5,7 @@ import { Pagination } from '@/components/ui/Pagination';
 import * as logger from '@/lib/logger';
 import { useAppSelector } from '@/store';
 import { selectVisibleColumns } from '@/store/slices/tableSettingsSlice';
-import { CurrencyName } from '@/components/nbp/CurrencyName';
+import { CurrencyName } from '@/components/nbp/shared/CurrencyName';
 import type { NbpRate, NbpRateC, NbpGoldPrice, NbpTab } from '@/store/api/nbpApi';
 
 const SKELETON_ROWS = 8;

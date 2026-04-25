@@ -5,12 +5,12 @@ import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/lib/useBreakpoint';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { NbpFilters } from '@/components/nbp/NbpFilters';
-import { NbpGrid } from '@/components/nbp/NbpGrid';
-import { NbpTiles } from '@/components/nbp/NbpTiles';
-import { NbpChart, type ChartPoint } from '@/components/nbp/NbpChart';
-import { NbpDetails, type NbpSelection } from '@/components/nbp/NbpDetails';
-import { TableSettingsModal } from '@/components/nbp/TableSettingsModal';
+import { NbpFilters } from '@/components/nbp/filters/NbpFilters';
+import { NbpGrid } from '@/components/nbp/grid/NbpGrid';
+import { NbpTiles } from '@/components/nbp/tiles/NbpTiles';
+import { NbpChart, type ChartPoint } from '@/components/nbp/chart/NbpChart';
+import { NbpDetails, type NbpSelection } from '@/components/nbp/details/NbpDetails';
+import { TableSettingsModal } from '@/components/nbp/modal/TableSettingsModal';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import {
   useGetExchangeTableQuery,
