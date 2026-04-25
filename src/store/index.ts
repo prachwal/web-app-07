@@ -4,6 +4,7 @@ import themeReducer from './slices/themeSlice';
 import localeReducer from './slices/localeSlice';
 import notificationsReducer from './slices/notificationsSlice';
 import { baseApi } from './api/baseApi';
+import { nbpApi } from './api/nbpApi';
 
 /**
  * The application Redux store.
@@ -15,8 +16,10 @@ export const store = configureStore({
     locale: localeReducer,
     notifications: notificationsReducer,
     [baseApi.reducerPath]: baseApi.reducer,
+    [nbpApi.reducerPath]: nbpApi.reducer,
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(baseApi.middleware, nbpApi.middleware),
 });
 
 /** Inferred root state type from the store. */

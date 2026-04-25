@@ -4,6 +4,7 @@ export const ROUTES = {
   ABOUT: '/about',
   CONTACT: '/contact',
   SETTINGS: '/settings',
+  NBP: '/nbp',
   NOT_FOUND: '*',
 } as const;
 

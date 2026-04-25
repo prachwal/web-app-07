@@ -7,6 +7,7 @@ import '@/i18n';
 import themeReducer from '@/store/slices/themeSlice';
 import localeReducer from '@/store/slices/localeSlice';
 import { baseApi } from '@/store/api/baseApi';
+import { nbpApi } from '@/store/api/nbpApi';
 
 /**
  * Creates a fresh Redux store for testing.
@@ -20,8 +21,10 @@ export function createTestStore() {
       theme: themeReducer,
       locale: localeReducer,
       [baseApi.reducerPath]: baseApi.reducer,
+      [nbpApi.reducerPath]: nbpApi.reducer,
     },
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(baseApi.middleware, nbpApi.middleware),
   });
 }
 

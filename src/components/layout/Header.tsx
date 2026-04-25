@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { key: 'about', to: ROUTES.ABOUT },
   { key: 'contact', to: ROUTES.CONTACT },
   { key: 'settings', to: ROUTES.SETTINGS },
+  { key: 'nbp', to: ROUTES.NBP },
 ] as const;
 
 /**

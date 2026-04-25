@@ -1,0 +1,42 @@
+{
+  "title": "Kursy walut NBP",
+  "subtitle": "Narodowy Bank Polski — aktualne kursy walut i ceny złota",
+  "tabs": {
+    "tableA": "Tabela A",
+    "tableB": "Tabela B",
+    "gold": "Złoto"
+  },
+  "filters": {
+    "search": "Szukaj waluty…",
+    "startDate": "Od",
+    "endDate": "Do",
+    "clear": "Resetuj daty",
+    "apply": "Zastosuj"
+  },
+  "grid": {
+    "code": "Kod",
+    "currency": "Waluta",
+    "mid": "Kurs średni (PLN)",
+    "date": "Data",
+    "price": "Cena (PLN/g)",
+    "no": "Nr tabeli",
+    "noData": "Brak danych dla wybranych filtrów.",
+    "loading": "Ładowanie danych…"
+  },
+  "details": {
+    "heading": "Szczegóły",
+    "currency": "Waluta",
+    "code": "Kod",
+    "mid": "Kurs średni",
+    "unit": "PLN",
+    "date": "Data",
+    "tableNo": "Nr tabeli",
+    "price": "Cena",
+    "priceUnit": "PLN/g",
+    "close": "Zamknij szczegóły"
+  },
+  "errors": {
+    "fetch": "Nie udało się załadować danych. Spróbuj ponownie.",
+    "retry": "Spróbuj ponownie"
+  }
+}

@@ -15,6 +15,7 @@ const SettingsPage = lazy(() =>
 const NotFoundPage = lazy(() =>
   import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
 );
+const NbpPage = lazy(() => import('@/pages/NbpPage').then((m) => ({ default: m.NbpPage })));
 
 const wrap = (el: React.ReactElement) => <Suspense fallback={<PageLoader />}>{el}</Suspense>;
 
@@ -26,5 +27,6 @@ export const router = createBrowserRouter([
   { path: ROUTES.ABOUT, element: wrap(<AboutPage />), errorElement: <ErrorPage /> },
   { path: ROUTES.CONTACT, element: wrap(<ContactPage />), errorElement: <ErrorPage /> },
   { path: ROUTES.SETTINGS, element: wrap(<SettingsPage />), errorElement: <ErrorPage /> },
+  { path: ROUTES.NBP, element: wrap(<NbpPage />), errorElement: <ErrorPage /> },
   { path: ROUTES.NOT_FOUND, element: wrap(<NotFoundPage />), errorElement: <ErrorPage /> },
 ]);

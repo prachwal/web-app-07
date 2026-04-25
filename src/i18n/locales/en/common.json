@@ -3,7 +3,8 @@
     "home": "Home",
     "about": "About",
     "contact": "Contact",
-    "settings": "Settings"
+    "settings": "Settings",
+    "nbp": "NBP Rates"
   },
   "theme": {
     "toggle": "Toggle theme",

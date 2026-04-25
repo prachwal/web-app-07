@@ -1,0 +1,42 @@
+{
+  "title": "NBP Exchange Rates",
+  "subtitle": "Polish National Bank — live currency and gold price data",
+  "tabs": {
+    "tableA": "Table A",
+    "tableB": "Table B",
+    "gold": "Gold"
+  },
+  "filters": {
+    "search": "Search currency…",
+    "startDate": "From",
+    "endDate": "To",
+    "clear": "Reset dates",
+    "apply": "Apply"
+  },
+  "grid": {
+    "code": "Code",
+    "currency": "Currency",
+    "mid": "Mid rate (PLN)",
+    "date": "Date",
+    "price": "Price (PLN/g)",
+    "no": "Table no.",
+    "noData": "No data for the selected filters.",
+    "loading": "Loading data…"
+  },
+  "details": {
+    "heading": "Details",
+    "currency": "Currency",
+    "code": "Code",
+    "mid": "Mid rate",
+    "unit": "PLN",
+    "date": "Date",
+    "tableNo": "Table no.",
+    "price": "Price",
+    "priceUnit": "PLN/g",
+    "close": "Close details"
+  },
+  "errors": {
+    "fetch": "Failed to load data. Please try again.",
+    "retry": "Retry"
+  }
+}
