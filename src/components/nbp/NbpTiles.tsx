@@ -182,8 +182,8 @@ export function NbpTiles({
                     'absolute right-2 top-2 rounded p-0.5 transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     isFav
-                      ? 'text-amber-500 opacity-100'
-                      : 'text-muted-foreground opacity-0 group-hover:opacity-100',
+                      ? 'text-amber-500'
+                      : 'text-muted-foreground/40 sm:opacity-0 sm:group-hover:opacity-100',
                   )}
                 >
                   <Star size={13} fill={isFav ? 'currentColor' : 'none'} aria-hidden="true" />
@@ -202,9 +202,9 @@ export function NbpTiles({
                     onClick={() => onViewChart(rate.code)}
                     aria-label={t('grid.chartFor', { code: rate.code })}
                     className={cn(
-                      'mt-1 flex items-center gap-1 self-start rounded text-xs text-muted-foreground',
-                      'opacity-0 group-hover:opacity-100 transition-opacity',
-                      'hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                      'mt-1 flex items-center gap-1 self-start rounded text-xs text-muted-foreground/60',
+                      'transition-opacity hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                      'sm:opacity-0 sm:group-hover:opacity-100',
                     )}
                   >
                     <BarChart2 size={11} aria-hidden="true" />
@@ -238,8 +238,8 @@ export function NbpTiles({
                     'absolute right-2 top-2 rounded p-0.5 transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     isFav
-                      ? 'text-amber-500 opacity-100'
-                      : 'text-muted-foreground opacity-0 group-hover:opacity-100',
+                      ? 'text-amber-500'
+                      : 'text-muted-foreground/40 sm:opacity-0 sm:group-hover:opacity-100',
                   )}
                 >
                   <Star size={13} fill={isFav ? 'currentColor' : 'none'} aria-hidden="true" />
@@ -264,9 +264,9 @@ export function NbpTiles({
                     onClick={() => onViewChart(rate.code)}
                     aria-label={t('grid.chartFor', { code: rate.code })}
                     className={cn(
-                      'mt-1 flex items-center gap-1 self-start rounded text-xs text-muted-foreground',
-                      'opacity-0 group-hover:opacity-100 transition-opacity',
-                      'hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                      'mt-1 flex items-center gap-1 self-start rounded text-xs text-muted-foreground/60',
+                      'transition-opacity hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                      'sm:opacity-0 sm:group-hover:opacity-100',
                     )}
                   >
                     <BarChart2 size={11} aria-hidden="true" />

@@ -2,6 +2,14 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useReducedMotion } from 'motion/react';
 import { useIsDark } from '@/lib/useTheme';
+import { formatAxisNumber } from '@/lib/format';
+import {
+  CHART_AXIS_LIGHT, CHART_AXIS_DARK,
+  CHART_GRID_LIGHT, CHART_GRID_DARK,
+  CHART_TOOLTIP_BG_LIGHT, CHART_TOOLTIP_BG_DARK,
+  CHART_TOOLTIP_TEXT_LIGHT, CHART_TOOLTIP_TEXT_DARK,
+  CHART_COLOR_MID, CHART_COLOR_BID, CHART_COLOR_ASK, CHART_COLOR_GOLD_LINE,
+} from '@/lib/chartColors';
 import * as logger from '@/lib/logger';
 import {
   ResponsiveContainer,
@@ -60,10 +68,18 @@ export function NbpChart({ data, isLoading, tab, currency = '' }: NbpChartProps)
   const isDark = useIsDark();
 
   /* ── theme-resolved colors for SVG presentation attributes ──
-   * SVG presentation attributes (stroke, fill, etc.) do NOT support
-   * CSS custom properties, so we resolve explicit hex values here. ── */
-  const axisColor = isDark ? '#94a3b8' : '#64748b';   // slate-400 / slate-500
-  const gridColor = isDark ? '#1e293b' : '#e2e8f0';   // slate-800 / slate-200
+   * SVG presentation attributes (stroke, fill, etc.) do NOT support CSS custom
+   * properties. We use constants from @/lib/chartColors (which mirror the design
+   * tokens in globals.css) and select between light/dark variants using the
+   * synchronous Redux `isDark` value — no effects or state needed. ── */
+  const axisColor  = isDark ? CHART_AXIS_DARK  : CHART_AXIS_LIGHT;
+  const gridColor  = isDark ? CHART_GRID_DARK  : CHART_GRID_LIGHT;
+  const tooltipBg  = isDark ? CHART_TOOLTIP_BG_DARK  : CHART_TOOLTIP_BG_LIGHT;
+  const tooltipFg  = isDark ? CHART_TOOLTIP_TEXT_DARK : CHART_TOOLTIP_TEXT_LIGHT;
+  const COLOR_MID  = CHART_COLOR_MID;
+  const COLOR_BID  = CHART_COLOR_BID;
+  const COLOR_ASK  = CHART_COLOR_ASK;
+  const COLOR_GOLD = CHART_COLOR_GOLD_LINE;
 
   const yLabel = tab === 'gold' ? t('chart.axisGold') : t('chart.axisRate');
   const ariaLabel =
@@ -118,14 +134,8 @@ export function NbpChart({ data, isLoading, tab, currency = '' }: NbpChartProps)
     );
   }
 
-  /* ── axis formatter — shorten date to MM-DD ── */
-  const tickFormatter = (value: string) => value.slice(5);
-
-  /* ── chart color palette (explicit hex — CSS vars unsupported in SVG fill attributes) ── */
-  const COLOR_MID = '#3b82f6';   // blue-500
-  const COLOR_BID = '#22c55e';   // green-500
-  const COLOR_ASK = '#ef4444';   // red-500
-  const COLOR_GOLD = '#f59e0b';  // amber-500
+  /* ── date axis formatter — shorten to MM-DD ── */
+  const dateTickFormatter = (value: string) => value.slice(5);
 
   return (
     <div
@@ -136,102 +146,110 @@ export function NbpChart({ data, isLoading, tab, currency = '' }: NbpChartProps)
         'transition-opacity duration-150',
       )}
     >
-      <p className="mb-4 text-sm font-medium text-foreground">{t('chart.heading')}</p>
+      <p className="mb-3 text-sm font-medium text-foreground">{t('chart.heading')}</p>
 
-      <ResponsiveContainer width="100%" height={280}>
-        <LineChart data={data} margin={{ top: 4, right: 24, bottom: 4, left: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-          <XAxis
-            dataKey="date"
-            tickFormatter={tickFormatter}
-            tick={{ fontSize: 11, fill: axisColor }}
-            axisLine={{ stroke: gridColor }}
-            tickLine={false}
-            label={{
-              value: t('chart.axisDate'),
-              position: 'insideBottom',
-              offset: -2,
-              style: { fontSize: 11, fill: axisColor },
-            }}
-          />
-          <YAxis
-            domain={yDomain}
-            tick={{ fontSize: 11, fill: axisColor }}
-            axisLine={{ stroke: gridColor }}
-            tickLine={false}
-            width={56}
-            label={{
-              value: yLabel,
-              angle: -90,
-              position: 'insideLeft',
-              offset: 12,
-              style: { fontSize: 11, fill: axisColor },
-            }}
-          />
-          <Tooltip
-            contentStyle={{
-              background: 'hsl(var(--popover))',
-              border: '1px solid hsl(var(--border))',
-              borderRadius: '6px',
-              fontSize: 12,
-              color: 'hsl(var(--popover-foreground))',
-            }}
-          />
-          <Legend
-            wrapperStyle={{ fontSize: 12, color: axisColor }}
-          />
+      {/* Y-axis title rendered in HTML to avoid SVG coordinate-system positioning issues */}
+      <div className="flex items-stretch gap-1">
+        <div className="flex shrink-0 items-center justify-center" style={{ width: 14 }}>
+          <span
+            className="whitespace-nowrap text-[10px] text-muted-foreground"
+            style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+          >
+            {yLabel}
+          </span>
+        </div>
 
-          {/* Table A / B — single mid line */}
-          {(tab === 'A' || tab === 'B') && (
-            <Line
-              type="monotone"
-              dataKey="mid"
-              name={t('chart.mid')}
-              stroke={COLOR_MID}
-              strokeWidth={2}
-              dot={false}
-              isAnimationActive={animate}
-            />
-          )}
-
-          {/* Table C — bid + ask lines */}
-          {tab === 'C' && (
-            <>
-              <Line
-                type="monotone"
-                dataKey="bid"
-                name={t('chart.bid')}
-                stroke={COLOR_BID}
-                strokeWidth={2}
-                dot={false}
-                isAnimationActive={animate}
+        <div className="h-56 w-full sm:h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data} margin={{ top: 4, right: 20, bottom: 28, left: 4 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis
+                dataKey="date"
+                tickFormatter={dateTickFormatter}
+                tick={{ fontSize: 10, fill: axisColor }}
+                axisLine={{ stroke: gridColor }}
+                tickLine={false}
+                label={{
+                  value: t('chart.axisDate'),
+                  position: 'insideBottom',
+                  offset: -10,
+                  style: { fontSize: 10, fill: axisColor },
+                }}
               />
-              <Line
-                type="monotone"
-                dataKey="ask"
-                name={t('chart.ask')}
-                stroke={COLOR_ASK}
-                strokeWidth={2}
-                dot={false}
-                isAnimationActive={animate}
+              <YAxis
+                domain={yDomain}
+                tickFormatter={formatAxisNumber}
+                tick={{ fontSize: 10, fill: axisColor }}
+                axisLine={{ stroke: gridColor }}
+                tickLine={false}
+                width={52}
               />
-            </>
-          )}
+              <Tooltip
+                contentStyle={{
+                  background: tooltipBg,
+                  border: `1px solid ${gridColor}`,
+                  borderRadius: '6px',
+                  fontSize: 12,
+                  color: tooltipFg,
+                }}
+              />
+              <Legend
+                wrapperStyle={{ fontSize: 12, color: axisColor }}
+              />
 
-          {/* Gold — single price line */}
-          {tab === 'gold' && (
-            <Line
-              type="monotone"
-              dataKey="cena"
-              name={t('chart.axisGold')}
-              stroke={COLOR_GOLD}
-              strokeWidth={2}
-              dot={false}
-              isAnimationActive={animate}
-            />
-          )}
-        </LineChart>
-      </ResponsiveContainer>
+              {/* Table A / B — single mid line */}
+              {(tab === 'A' || tab === 'B') && (
+                <Line
+                  type="monotone"
+                  dataKey="mid"
+                  name={t('chart.mid')}
+                  stroke={COLOR_MID}
+                  strokeWidth={2}
+                  dot={false}
+                  isAnimationActive={animate}
+                />
+              )}
+
+              {/* Table C — bid + ask lines */}
+              {tab === 'C' && (
+                <>
+                  <Line
+                    type="monotone"
+                    dataKey="bid"
+                    name={t('chart.bid')}
+                    stroke={COLOR_BID}
+                    strokeWidth={2}
+                    dot={false}
+                    isAnimationActive={animate}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="ask"
+                    name={t('chart.ask')}
+                    stroke={COLOR_ASK}
+                    strokeWidth={2}
+                    dot={false}
+                    isAnimationActive={animate}
+                  />
+                </>
+              )}
+
+              {/* Gold — single price line */}
+              {tab === 'gold' && (
+                <Line
+                  type="monotone"
+                  dataKey="cena"
+                  name={t('chart.axisGold')}
+                  stroke={COLOR_GOLD}
+                  strokeWidth={2}
+                  dot={false}
+                  isAnimationActive={animate}
+                />
+              )}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   );
 }

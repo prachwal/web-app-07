@@ -273,8 +273,8 @@ export function NbpGrid({
                               'rounded p-0.5 transition-colors',
                               'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
                               isFav
-                                ? 'text-amber-500 opacity-100'
-                                : 'text-muted-foreground opacity-0 group-hover:opacity-100',
+                                ? 'text-amber-500'
+                                : 'text-muted-foreground/40 sm:opacity-0 sm:group-hover:opacity-100',
                             )}
                           >
                             <Star size={11} fill={isFav ? 'currentColor' : 'none'} aria-hidden="true" />
@@ -287,9 +287,9 @@ export function NbpGrid({
                             aria-label={t('grid.chartFor', { code: rate.code })}
                             title={t('grid.chartFor', { code: rate.code })}
                             className={cn(
-                              'rounded p-0.5 text-muted-foreground opacity-0 transition-opacity',
+                              'rounded p-0.5 text-muted-foreground/40 transition-opacity',
                               'hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                              'group-hover:opacity-100',
+                              'sm:opacity-0 sm:group-hover:opacity-100',
                             )}
                           >
                             <BarChart2 size={12} aria-hidden="true" />
@@ -329,8 +329,8 @@ export function NbpGrid({
                               'rounded p-0.5 transition-colors',
                               'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
                               isFav
-                                ? 'text-amber-500 opacity-100'
-                                : 'text-muted-foreground opacity-0 group-hover:opacity-100',
+                                ? 'text-amber-500'
+                                : 'text-muted-foreground/40 sm:opacity-0 sm:group-hover:opacity-100',
                             )}
                           >
                             <Star size={11} fill={isFav ? 'currentColor' : 'none'} aria-hidden="true" />
@@ -343,9 +343,9 @@ export function NbpGrid({
                             aria-label={t('grid.chartFor', { code: rate.code })}
                             title={t('grid.chartFor', { code: rate.code })}
                             className={cn(
-                              'rounded p-0.5 text-muted-foreground opacity-0 transition-opacity',
+                              'rounded p-0.5 text-muted-foreground/40 transition-opacity',
                               'hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                              'group-hover:opacity-100',
+                              'sm:opacity-0 sm:group-hover:opacity-100',
                             )}
                           >
                             <BarChart2 size={12} aria-hidden="true" />

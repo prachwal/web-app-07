@@ -2,12 +2,15 @@ import { useState, useEffect, useTransition, useDeferredValue, useMemo, useCallb
 import { useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'motion/react';
+import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/lib/useBreakpoint';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { NbpFilters } from '@/components/nbp/NbpFilters';
 import { NbpGrid } from '@/components/nbp/NbpGrid';
 import { NbpTiles } from '@/components/nbp/NbpTiles';
 import { NbpChart, type ChartPoint } from '@/components/nbp/NbpChart';
 import { NbpDetails, type NbpSelection } from '@/components/nbp/NbpDetails';
+import { BottomSheet } from '@/components/ui/BottomSheet';
 import {
   useGetExchangeTableQuery,
   useGetExchangeTableCQuery,
@@ -86,6 +89,7 @@ export function NbpPage(): React.JSX.Element {
   const { t } = useTranslation('nbp');
   const reducedMotion = useReducedMotion();
   const [searchParams, setSearchParams] = useSearchParams();
+  const isMobile = useIsMobile();
 
   /* ── URL-derived state (URL is the single source of truth for filters) ── */
   const tabParam = searchParams.get('tab');
@@ -411,36 +415,57 @@ export function NbpPage(): React.JSX.Element {
               onPageChange={setTilesPage}
             />
           ) : (
-            /* Grid + details side-panel */
-            <div
-              className={`grid gap-6 ${selection ? 'lg:grid-cols-[1fr_280px]' : 'grid-cols-1'}`}
-            >
-              <NbpGrid
-                tab={tab}
-                rates={tab === 'C' ? [] : filteredRates}
-                ratesC={tab === 'C' ? (tableCEntry?.rates ?? []) : []}
-                goldPrices={goldPrices}
-                isLoading={activeIsLoading}
-                isFetching={activeIsFetching}
-                error={activeError}
-                selectedCode={selectedCode}
-                selectedGoldDate={selectedGoldDate}
-                onRateSelect={handleRateSelect}
-                onGoldSelect={handleGoldSelect}
-                onRetry={handleRetry}
-                onViewChart={tab !== 'gold' ? handleViewChart : undefined}
-                favorites={favorites}
-                onToggleFavorite={toggleFavorite}
-                page={gridPage}
-                onPageChange={setGridPage}
-              />
+            /* Grid + details side-panel (desktop) / bottom sheet (mobile) */
+            <>
+              <div
+                className={cn(
+                  'grid gap-6',
+                  !isMobile && selection && 'lg:grid-cols-[1fr_280px]',
+                )}
+              >
+                <NbpGrid
+                  tab={tab}
+                  rates={tab === 'C' ? [] : filteredRates}
+                  ratesC={tab === 'C' ? (tableCEntry?.rates ?? []) : []}
+                  goldPrices={goldPrices}
+                  isLoading={activeIsLoading}
+                  isFetching={activeIsFetching}
+                  error={activeError}
+                  selectedCode={selectedCode}
+                  selectedGoldDate={selectedGoldDate}
+                  onRateSelect={handleRateSelect}
+                  onGoldSelect={handleGoldSelect}
+                  onRetry={handleRetry}
+                  onViewChart={tab !== 'gold' ? handleViewChart : undefined}
+                  favorites={favorites}
+                  onToggleFavorite={toggleFavorite}
+                  page={gridPage}
+                  onPageChange={setGridPage}
+                />
 
-              <NbpDetails
-                selection={selection}
+                {/* Desktop inline details panel — hidden on mobile (uses BottomSheet instead) */}
+                {!isMobile && (
+                  <NbpDetails
+                    selection={selection}
+                    onClose={() => setSelection(null)}
+                    onNavigateToChart={tab !== 'gold' ? handleViewChart : undefined}
+                  />
+                )}
+              </div>
+
+              {/* Mobile bottom sheet — slides up over the table when a row is selected */}
+              <BottomSheet
+                open={isMobile && selection !== null}
                 onClose={() => setSelection(null)}
-                onNavigateToChart={tab !== 'gold' ? handleViewChart : undefined}
-              />
-            </div>
+                ariaLabel={t('details.heading')}
+              >
+                <NbpDetails
+                  selection={selection}
+                  onClose={() => setSelection(null)}
+                  onNavigateToChart={tab !== 'gold' ? handleViewChart : undefined}
+                />
+              </BottomSheet>
+            </>
           )}
         </motion.div>
       </div>
