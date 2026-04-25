@@ -1,6 +1,6 @@
 /**
  * @file src/components/contact/ContactFormField.tsx
- * Extends the generic FormField with an optional character counter.
+ * Accessible contact form field wrapper with an optional character counter.
  */
 
 import { cn } from '@/lib/utils';
