@@ -1,0 +1,16 @@
+{
+  "projectId": "prj_SN9yO2NnYOc49x7of8KV13U4Ezid",
+  "orgId": "team_jjYsHHSKHSii8hlf2vAvjrLE",
+  "projectName": "web-app-07",
+  "settings": {
+    "createdAt": 1777136123172,
+    "framework": "vite",
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": "pnpm exec vite build",
+    "outputDirectory": "dist",
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "24.x"
+  }
+}

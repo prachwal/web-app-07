@@ -201,5 +201,3 @@ function DetailRow({ label, value }: DetailRowProps): React.JSX.Element {
     </div>
   );
 }
-
-export type { NbpSelection };

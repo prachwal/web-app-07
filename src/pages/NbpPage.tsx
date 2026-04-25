@@ -1,7 +1,6 @@
 import { useState, useEffect, useTransition, useDeferredValue, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { motion, useReducedMotion } from 'motion/react';
 import { Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/lib/useBreakpoint';
@@ -13,6 +12,7 @@ import {
 } from '@/store/slices/tableSettingsSlice';
 import type { NbpTableGroup, ChartRangePreset } from '@/store/slices/tableSettingsSlice';
 import { PageLayout } from '@/components/layout/PageLayout';
+import { PageMotion } from '@/components/layout/PageMotion';
 import { NbpFilters } from '@/components/nbp/filters/NbpFilters';
 import { NbpGrid } from '@/components/nbp/grid/NbpGrid';
 import { NbpTiles } from '@/components/nbp/tiles/NbpTiles';
@@ -20,6 +20,10 @@ import { NbpChart, type ChartPoint } from '@/components/nbp/chart/NbpChart';
 import { NbpDetails, type NbpSelection } from '@/components/nbp/details/NbpDetails';
 import { TableSettingsModal } from '@/components/nbp/modal/TableSettingsModal';
 import { BottomSheet } from '@/components/ui/BottomSheet';
+import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import { daysAgo, today } from '@/lib/dateUtils';
+import { lsGet, lsSet } from '@/lib/storage';
+
 import {
   useGetExchangeTableQuery,
   useGetExchangeTableCQuery,
@@ -33,18 +37,6 @@ import {
   type NbpRateC,
   type NbpGoldPrice,
 } from '@/store/api/nbpApi';
-
-/** Returns an ISO date string N days before today. */
-function daysAgo(n: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return d.toISOString().split('T')[0];
-}
-
-/** Returns today's date as an ISO string. */
-function today(): string {
-  return new Date().toISOString().split('T')[0];
-}
 
 /** Return an ISO date string N days before today, or an absolute preset range. */
 function presetRange(preset: ChartRangePreset): { start: string; end: string } {
@@ -73,26 +65,6 @@ export type SortField = 'default' | 'code' | 'mid' | 'bid' | 'ask' | 'favorites'
 const LS_VIEW_KEY = 'nbp:view';
 const LS_FAVORITES_KEY = 'nbp:favorites';
 
-/** Read a value from localStorage safely. Returns null on SSR or parse errors. */
-function lsGet<T>(key: string): T | null {
-  try {
-    const raw = localStorage.getItem(key);
-    if (raw === null) return null;
-    return JSON.parse(raw) as T;
-  } catch {
-    return null;
-  }
-}
-
-/** Write a value to localStorage safely. */
-function lsSet(key: string, value: unknown): void {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // quota exceeded or private mode — ignore
-  }
-}
-
 /**
  * NBP Exchange Rates page.
  *
@@ -115,7 +87,6 @@ function lsSet(key: string, value: unknown): void {
  */
 export function NbpPage(): React.JSX.Element {
   const { t } = useTranslation('nbp');
-  const reducedMotion = useReducedMotion();
   const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
   const dispatch = useAppDispatch();
@@ -123,6 +94,9 @@ export function NbpPage(): React.JSX.Element {
   /* ── URL-derived state (URL is the single source of truth for filters) ── */
   const tabParam = searchParams.get('tab');
   const tab: NbpTab = VALID_TABS.includes(tabParam as NbpTab) ? (tabParam as NbpTab) : 'A';
+  /* ── dynamic page title per tab ── */
+  const tabTitles: Record<NbpTab, string> = { A: 'Tabela A', B: 'Tabela B', C: 'Tabela C', gold: 'Złoto' };
+  useDocumentTitle(`Kursy walut NBP — ${tabTitles[tab]}`);
 
   const rawView = searchParams.get('view');
   const viewMode: ViewMode = VALID_VIEWS.includes(rawView as ViewMode)
@@ -402,11 +376,7 @@ export function NbpPage(): React.JSX.Element {
   return (
     <PageLayout>
       <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-10 lg:px-8">
-        <motion.div
-          initial={reducedMotion ? false : { opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-        >
+        <PageMotion>
           {/* Page header */}
           <header className="mb-4 sm:mb-8">
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-3xl">{t('title')}</h1>
@@ -476,13 +446,14 @@ export function NbpPage(): React.JSX.Element {
               aria-label={t('grid.settings')}
               title={t('grid.settings')}
               className={cn(
-                'shrink-0 rounded-md p-1.5 text-muted-foreground/60 transition-colors',
+                'shrink-0 flex items-center gap-1.5 rounded-md px-2 py-1.5 text-muted-foreground/60 transition-colors',
                 'hover:bg-muted hover:text-foreground',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 settingsOpen && 'bg-muted text-foreground',
               )}
             >
               <Settings2 size={15} aria-hidden="true" />
+              <span className="hidden text-xs font-medium sm:inline">{t('grid.settings')}</span>
             </button>
           </div>
 
@@ -586,7 +557,7 @@ export function NbpPage(): React.JSX.Element {
             group={chartGroup}
             viewMode={viewMode}
           />
-        </motion.div>
+        </PageMotion>
       </div>
     </PageLayout>
   );

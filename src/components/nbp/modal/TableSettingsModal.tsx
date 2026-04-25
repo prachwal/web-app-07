@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, Info, X } from 'lucide-react';
+import { Info, X } from 'lucide-react';
+import { Accordion } from '@/components/ui/Accordion';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/lib/useBreakpoint';
 import { useAppDispatch, useAppSelector } from '@/store';
@@ -69,42 +70,6 @@ function SettingHelp({ text }: { text: string }): React.JSX.Element {
 }
 
 type MobileSectionKey = 'columns' | 'layout' | 'chart' | 'axis';
-
-function MobileAccordionSection({
-  title,
-  summary,
-  open,
-  onToggle,
-  children,
-}: {
-  title: string;
-  summary: string;
-  open: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}): React.JSX.Element {
-  return (
-    <div className="overflow-hidden rounded-xl border border-border bg-background">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left"
-      >
-        <div className="min-w-0">
-          <div className="text-sm font-medium text-foreground">{title}</div>
-          <div className="mt-0.5 truncate text-[11px] text-muted-foreground">{summary}</div>
-        </div>
-        <ChevronDown
-          size={16}
-          aria-hidden="true"
-          className={cn('shrink-0 text-muted-foreground transition-transform', open && 'rotate-180')}
-        />
-      </button>
-      {open && <div className="border-t border-border px-3 py-3">{children}</div>}
-    </div>
-  );
-}
 
 export interface TableSettingsModalProps {
   open: boolean;
@@ -442,53 +407,20 @@ export function TableSettingsModal({
 
         <div className="px-4 py-3">
           {isMobile ? (
-            <div className="flex flex-col gap-3">
-              <MobileAccordionSection
-                title={t('settings.columns')}
-                summary={columnsSummary}
-                open={mobileOpenSection === 'columns'}
-                onToggle={() =>
-                  setMobileOpenSection((current) => (current === 'columns' ? null : 'columns'))
-                }
-              >
-                {renderColumnsBody()}
-              </MobileAccordionSection>
-
-              <MobileAccordionSection
-                title={t('settings.layout')}
-                summary={layoutSummary}
-                open={mobileOpenSection === 'layout'}
-                onToggle={() =>
-                  setMobileOpenSection((current) => (current === 'layout' ? null : 'layout'))
-                }
-              >
-                {renderLayoutBody()}
-              </MobileAccordionSection>
-
-              <MobileAccordionSection
-                title={t('settings.chart')}
-                summary={chartSummary}
-                open={mobileOpenSection === 'chart'}
-                onToggle={() =>
-                  setMobileOpenSection((current) => (current === 'chart' ? null : 'chart'))
-                }
-              >
-                {renderChartBody()}
-              </MobileAccordionSection>
-
-              {group !== 'gold' && (
-                <MobileAccordionSection
-                  title={t('settings.axisMode')}
-                  summary={axisSummary}
-                  open={mobileOpenSection === 'axis'}
-                  onToggle={() =>
-                    setMobileOpenSection((current) => (current === 'axis' ? null : 'axis'))
-                  }
-                >
-                  {renderAxisBody()}
-                </MobileAccordionSection>
-              )}
-            </div>
+            <Accordion
+              items={[
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                { key: 'columns' as MobileSectionKey, title: t('settings.columns'), summary: columnsSummary, content: renderColumnsBody() },
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                { key: 'layout' as MobileSectionKey, title: t('settings.layout'), summary: layoutSummary, content: renderLayoutBody() },
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                { key: 'chart' as MobileSectionKey, title: t('settings.chart'), summary: chartSummary, content: renderChartBody() },
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                ...(group !== 'gold' ? [{ key: 'axis' as MobileSectionKey, title: t('settings.axisMode'), summary: axisSummary, content: renderAxisBody() }] : []),
+              ]}
+              openKey={mobileOpenSection}
+              onToggle={(key) => setMobileOpenSection((cur) => cur === key ? null : key)}
+            />
           ) : (
             <>
               <fieldset className="mb-4">

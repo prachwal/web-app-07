@@ -6,6 +6,8 @@
     "namePlaceholder": "Twoje imię i nazwisko",
     "email": "Email",
     "emailPlaceholder": "twoj@email.com",
+    "subject": "Temat",
+    "subjectPlaceholder": "Temat wiadomości",
     "message": "Wiadomość",
     "messagePlaceholder": "W czym możemy Ci pomóc?",
     "submit": "Wyślij wiadomość",
@@ -13,8 +15,22 @@
   },
   "validation": {
     "nameMin": "Imię musi mieć co najmniej 2 znaki",
+    "nameMax": "Imię może mieć maksymalnie 100 znaków",
     "emailInvalid": "Podaj prawidłowy adres email",
-    "messageMin": "Wiadomość musi mieć co najmniej 10 znaków"
+    "emailMax": "Email może mieć maksymalnie 254 znaki",
+    "subjectMin": "Temat musi mieć co najmniej 3 znaki",
+    "subjectMax": "Temat może mieć maksymalnie 200 znaków",
+    "messageMin": "Wiadomość musi mieć co najmniej 10 znaków",
+    "messageMax": "Wiadomość może mieć maksymalnie 5000 znaków"
+  },
+  "info": {
+    "heading": "Informacje kontaktowe",
+    "emailLabel": "Email",
+    "email": "kontakt@demo-app.pl",
+    "locationLabel": "Lokalizacja",
+    "location": "Warszawa, Polska",
+    "hoursLabel": "Godziny pracy",
+    "hours": "Pon–Pt, 9:00–17:00"
   },
   "sent": "Twoja wiadomość została wysłana! Odpiszemy wkrótce.",
   "error": "Coś poszło nie tak. Spróbuj ponownie."

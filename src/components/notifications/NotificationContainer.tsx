@@ -1,5 +1,6 @@
 import { AnimatePresence } from 'motion/react';
 import { useAppDispatch, useAppSelector } from '@/store';
+import { selectNotificationsEnabled } from '@/store/slices/uiPreferencesSlice';
 import { removeNotification } from '@/store/slices/notificationsSlice';
 import { useIsMobile } from '@/lib/useBreakpoint';
 import { cn } from '@/lib/utils';
@@ -15,6 +16,9 @@ export function NotificationContainer(): React.JSX.Element {
   const dispatch = useAppDispatch();
   const notifications = useAppSelector((state) => state.notifications.items);
   const isMobile = useIsMobile();
+  const notificationsEnabled = useAppSelector(selectNotificationsEnabled);
+
+  if (!notificationsEnabled) return <></>;
 
   return (
     <div

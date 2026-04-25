@@ -14,9 +14,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@shared/*": ["./packages/shared/src/*"],
+      "@shared": ["./packages/shared/src/index.ts"]
     }
   },
-  "include": ["src", "eslint.config.ts", "vite.config.ts"],
+  "include": ["src", "packages/shared/src", "eslint.config.ts", "vite.config.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

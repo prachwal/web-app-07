@@ -1,11 +1,13 @@
 {
   "title": "Contact",
-  "subtitle": "Have a question or want to work together? Send us a message.",
+  "subtitle": "Have a question or want to work together? Write to us.",
   "form": {
-    "name": "Name",
-    "namePlaceholder": "Your name",
+    "name": "Full name",
+    "namePlaceholder": "Your full name",
     "email": "Email",
-    "emailPlaceholder": "your@email.com",
+    "emailPlaceholder": "you@email.com",
+    "subject": "Subject",
+    "subjectPlaceholder": "Message subject",
     "message": "Message",
     "messagePlaceholder": "How can we help you?",
     "submit": "Send message",
@@ -13,9 +15,23 @@
   },
   "validation": {
     "nameMin": "Name must be at least 2 characters",
-    "emailInvalid": "Please enter a valid email address",
-    "messageMin": "Message must be at least 10 characters"
+    "nameMax": "Name must be at most 100 characters",
+    "emailInvalid": "Please provide a valid email address",
+    "emailMax": "Email must be at most 254 characters",
+    "subjectMin": "Subject must be at least 3 characters",
+    "subjectMax": "Subject must be at most 200 characters",
+    "messageMin": "Message must be at least 10 characters",
+    "messageMax": "Message must be at most 5000 characters"
   },
-  "sent": "Your message has been sent! We'll get back to you soon.",
+  "info": {
+    "heading": "Contact information",
+    "emailLabel": "Email",
+    "email": "contact@demo-app.pl",
+    "locationLabel": "Location",
+    "location": "Warsaw, Poland",
+    "hoursLabel": "Office hours",
+    "hours": "Mon–Fri, 9:00–17:00"
+  },
+  "sent": "Your message has been sent! We'll reply shortly.",
   "error": "Something went wrong. Please try again."
 }

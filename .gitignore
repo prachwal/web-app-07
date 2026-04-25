@@ -7,4 +7,3 @@ artifacts
 .env.*
 .tsbuild
 .codex
-.vercel

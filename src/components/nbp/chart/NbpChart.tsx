@@ -29,6 +29,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { cn } from '@/lib/utils';
+import { SkeletonChart } from '@/components/ui/Skeleton';
 import type { NbpTab } from '@/store/api/nbpApi';
 import type { AxisPresentation, ChartInteractionMode } from '@/store/slices/tableSettingsSlice';
 
@@ -87,7 +88,7 @@ interface PointSnapshot {
 
 interface TooltipBridgeProps {
   active?: boolean;
-  payload?: Array<{ payload?: ChartDatum; value?: number; name?: string; dataKey?: string }>;
+  payload?: ReadonlyArray<unknown>;
   label?: string | number;
   onSelectIndex: (index: number | null) => void;
   interactionMode: ChartInteractionMode;
@@ -312,7 +313,8 @@ function buildSnapshot(
 function resolveSelectedIndex(
   payload: TooltipBridgeProps['payload'],
 ): number | null {
-  const point = payload?.[0]?.payload;
+  const firstPayload = payload?.[0] as { payload?: ChartDatum } | undefined;
+  const point = firstPayload?.payload;
   return point?._index ?? null;
 }
 
@@ -344,7 +346,8 @@ function TooltipBridge({
 
   if (!active || !payload?.length || index == null) return null;
 
-  const point = payload[0].payload;
+  const firstPayload = payload[0] as { payload?: ChartDatum } | undefined;
+  const point = firstPayload?.payload;
   if (!point) return null;
 
   const header = point.date.slice(5);
@@ -507,13 +510,7 @@ export function NbpChart({
       : `${t('chart.heading')} — ${currency}`;
 
   if (isLoading) {
-    return (
-      <div
-        aria-busy="true"
-        aria-label={t('grid.loading')}
-        className="h-72 animate-pulse rounded-2xl border border-border bg-muted/50 sm:h-80"
-      />
-    );
+    return <SkeletonChart />;
   }
 
   if (realPoints.length === 0) {

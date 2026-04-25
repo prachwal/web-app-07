@@ -1,108 +1,75 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '@/store';
 
-/** Global UI preferences affecting navigation and motion behavior. */
+/**
+ * Global UI preferences.
+ *
+ * NOTE: animateBackdrop / animatePanel / closeOnLink / closeOnEscape
+ * were removed — the mobile nav now uses pure CSS transitions and
+ * always closes on route change. These flags had no effect after the
+ * Header rewrite and were confusing users in Settings.
+ */
 export interface UiPreferencesState {
-  animateBackdrop: boolean;
-  animatePanel: boolean;
-  closeOnLink: boolean;
-  closeOnEscape: boolean;
+  /** Reduce all non-essential animations (respects prefers-reduced-motion). */
+  reduceMotion: boolean;
+  /** Show/hide the floating notifications area. */
+  notificationsEnabled: boolean;
 }
 
-/** Default UI preferences preserve the current mobile drawer behavior. */
-export const DEFAULT_UI_PREFERENCES: UiPreferencesState = {
-  animateBackdrop: true,
-  animatePanel: true,
-  closeOnLink: true,
-  closeOnEscape: true,
+const DEFAULT: UiPreferencesState = {
+  reduceMotion: false,
+  notificationsEnabled: true,
 };
 
 const LS_KEY = 'app:uiPreferences';
 
-function buildDefaultState(): UiPreferencesState {
-  return { ...DEFAULT_UI_PREFERENCES };
-}
-
-function readBoolean(value: unknown, fallback: boolean): boolean {
-  return typeof value === 'boolean' ? value : fallback;
-}
-
-/** Read persisted preferences from localStorage, falling back to defaults. */
-function loadFromStorage(): UiPreferencesState {
-  const defaults = buildDefaultState();
-
+function load(): UiPreferencesState {
   try {
-    if (typeof localStorage === 'undefined') {
-      return defaults;
-    }
-
+    if (typeof localStorage === 'undefined') return { ...DEFAULT };
     const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return defaults;
-
+    if (!raw) return { ...DEFAULT };
     const parsed = JSON.parse(raw) as Partial<UiPreferencesState>;
     return {
-      animateBackdrop: readBoolean(parsed.animateBackdrop, defaults.animateBackdrop),
-      animatePanel: readBoolean(parsed.animatePanel, defaults.animatePanel),
-      closeOnLink: readBoolean(parsed.closeOnLink, defaults.closeOnLink),
-      closeOnEscape: readBoolean(parsed.closeOnEscape, defaults.closeOnEscape),
+      reduceMotion: typeof parsed.reduceMotion === 'boolean' ? parsed.reduceMotion : DEFAULT.reduceMotion,
+      notificationsEnabled:
+        typeof parsed.notificationsEnabled === 'boolean'
+          ? parsed.notificationsEnabled
+          : DEFAULT.notificationsEnabled,
     };
   } catch {
-    return defaults;
+    return { ...DEFAULT };
   }
 }
 
-/** Persist current preferences to localStorage. */
 function persist(state: UiPreferencesState): void {
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify(state));
-  } catch {
-    // Ignore storage quota or private-mode failures.
-  }
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch { /* quota */ }
 }
 
-/**
- * Redux slice for global UI preferences.
- * Settings are persisted to localStorage on every change.
- */
 const uiPreferencesSlice = createSlice({
   name: 'uiPreferences',
-  initialState: (): UiPreferencesState => loadFromStorage(),
+  initialState: (): UiPreferencesState => load(),
   reducers: {
-    setAnimateBackdrop(state, action: PayloadAction<boolean>) {
-      state.animateBackdrop = action.payload;
+    setReduceMotion(state, action: PayloadAction<boolean>) {
+      state.reduceMotion = action.payload;
       persist(state);
     },
-    setAnimatePanel(state, action: PayloadAction<boolean>) {
-      state.animatePanel = action.payload;
-      persist(state);
-    },
-    setCloseOnLink(state, action: PayloadAction<boolean>) {
-      state.closeOnLink = action.payload;
-      persist(state);
-    },
-    setCloseOnEscape(state, action: PayloadAction<boolean>) {
-      state.closeOnEscape = action.payload;
+    setNotificationsEnabled(state, action: PayloadAction<boolean>) {
+      state.notificationsEnabled = action.payload;
       persist(state);
     },
     resetUiPreferences(state) {
-      Object.assign(state, buildDefaultState());
+      Object.assign(state, DEFAULT);
       persist(state);
     },
   },
 });
 
-export const {
-  setAnimateBackdrop,
-  setAnimatePanel,
-  setCloseOnLink,
-  setCloseOnEscape,
-  resetUiPreferences,
-} = uiPreferencesSlice.actions;
+export const { setReduceMotion, setNotificationsEnabled, resetUiPreferences } =
+  uiPreferencesSlice.actions;
 
 export const selectUiPreferences = (state: RootState) => state.uiPreferences;
-export const selectAnimateBackdrop = (state: RootState) => state.uiPreferences.animateBackdrop;
-export const selectAnimatePanel = (state: RootState) => state.uiPreferences.animatePanel;
-export const selectCloseOnLink = (state: RootState) => state.uiPreferences.closeOnLink;
-export const selectCloseOnEscape = (state: RootState) => state.uiPreferences.closeOnEscape;
+export const selectReduceMotion = (state: RootState) => state.uiPreferences.reduceMotion;
+export const selectNotificationsEnabled = (state: RootState) =>
+  state.uiPreferences.notificationsEnabled;
 
 export default uiPreferencesSlice.reducer;

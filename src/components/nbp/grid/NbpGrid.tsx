@@ -1,10 +1,14 @@
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, RefreshCw, BarChart2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Pagination } from '@/components/ui/Pagination';
-import * as logger from '@/lib/logger';
 import { useAppSelector } from '@/store';
 import { selectGroupSettings } from '@/store/slices/tableSettingsSlice';
+import { usePagination } from '@/lib/usePagination';
+import { useFavoriteSorter } from '@/lib/useFavoriteSorter';
+import { DataError } from '@/components/nbp/shared/DataError';
+import { SkeletonTableRow } from '@/components/ui/Skeleton';
+import { FavoriteButton } from '@/components/nbp/shared/FavoriteButton';
+import { ViewChartButton } from '@/components/nbp/shared/ViewChartButton';
 import { CurrencyName } from '@/components/nbp/shared/CurrencyName';
 import type { NbpRate, NbpRateC, NbpGoldPrice, NbpTab } from '@/store/api/nbpApi';
 
@@ -27,18 +31,6 @@ export interface NbpGridProps {
   onToggleFavorite?: (code: string) => void;
   page?: number;
   onPageChange?: (page: number) => void;
-}
-
-function SkeletonRow({ cols }: { cols: number }): React.JSX.Element {
-  return (
-    <tr aria-hidden="true">
-      {Array.from({ length: cols }).map((_, i) => (
-        <td key={i} className="px-4 py-3">
-          <div className="h-4 animate-pulse rounded bg-muted" />
-        </td>
-      ))}
-    </tr>
-  );
 }
 
 export function NbpGrid({
@@ -72,55 +64,23 @@ export function NbpGrid({
 
   const cols = isGold ? 2 : isTableC ? 4 : 3;
   const hasData = isGold ? goldPrices.length > 0 : isTableC ? ratesC.length > 0 : rates.length > 0;
+  const sortedRates = useFavoriteSorter(rates, favorites);
+  const sortedRatesC = useFavoriteSorter(ratesC, favorites);
 
-  const sortedRates = [...rates].sort((a, b) => {
-    const aFav = favorites.includes(a.code) ? 0 : 1;
-    const bFav = favorites.includes(b.code) ? 0 : 1;
-    return aFav - bFav;
-  });
+  const activeItems: Array<NbpRate | NbpRateC | NbpGoldPrice> = isGold
+    ? goldPrices
+    : isTableC
+      ? sortedRatesC
+      : sortedRates;
+  const { pageItems, safePage, totalPages } = usePagination(activeItems, page, pageSize);
 
-  const sortedRatesC = [...ratesC].sort((a, b) => {
-    const aFav = favorites.includes(a.code) ? 0 : 1;
-    const bFav = favorites.includes(b.code) ? 0 : 1;
-    return aFav - bFav;
-  });
-
-  const sortedGold = [...goldPrices];
-
-  const totalItems = isGold ? sortedGold.length : isTableC ? sortedRatesC.length : sortedRates.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-  const safePage = Math.min(Math.max(1, page), totalPages);
-  const offset = (safePage - 1) * pageSize;
-
-  const pageRates = sortedRates.slice(offset, offset + pageSize);
-  const pageRatesC = sortedRatesC.slice(offset, offset + pageSize);
-  const pageGold = sortedGold.slice(offset, offset + pageSize);
+  const pageRates: NbpRate[] = !isGold && !isTableC ? (pageItems as NbpRate[]) : [];
+  const pageRatesC: NbpRateC[] = isTableC ? (pageItems as NbpRateC[]) : [];
+  const pageGold: NbpGoldPrice[] = isGold ? (pageItems as NbpGoldPrice[]) : [];
 
   const visibleCols = visibleColumns.length;
 
-  if (error) {
-    return (
-      <div
-        role="alert"
-        className="flex flex-col items-center gap-4 rounded-xl border border-destructive/30 bg-destructive/5 py-16 text-center"
-      >
-        <AlertCircle size={32} className="text-destructive" aria-hidden="true" />
-        <p className="text-sm text-destructive">{t('errors.fetch')}</p>
-        <button
-          type="button"
-          onClick={onRetry}
-          className={cn(
-            'flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm',
-            'text-muted-foreground transition-colors hover:text-foreground',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          )}
-        >
-          <RefreshCw size={14} aria-hidden="true" />
-          {t('errors.retry')}
-        </button>
-      </div>
-    );
-  }
+  if (error) return <DataError onRetry={onRetry} />;
 
   return (
     <div
@@ -132,7 +92,7 @@ export function NbpGrid({
       <div className="overflow-x-auto">
         <table className="w-full text-sm" aria-busy={isLoading || isFetching}>
           <thead>
-            <tr className="border-b border-border bg-muted/50 text-left">
+            <tr className="border-b border-border bg-muted/50 text-left sticky top-0 z-10">
               {isGold ? (
                 <>
                   {visibleAB('date') && (
@@ -141,10 +101,7 @@ export function NbpGrid({
                     </th>
                   )}
                   {visibleAB('price') && (
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-right font-medium text-muted-foreground"
-                    >
+                    <th scope="col" className="px-4 py-3 text-right font-medium text-muted-foreground">
                       {t('grid.price')}
                     </th>
                   )}
@@ -184,10 +141,7 @@ export function NbpGrid({
                     </th>
                   )}
                   {visibleAB('mid') && (
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-right font-medium text-muted-foreground"
-                    >
+                    <th scope="col" className="px-4 py-3 text-right font-medium text-muted-foreground">
                       <span className="hidden sm:inline">{t('grid.mid')}</span>
                       <span className="sm:hidden">Mid</span>
                     </th>
@@ -200,11 +154,10 @@ export function NbpGrid({
           <tbody className="divide-y divide-border">
             {isLoading &&
               Array.from({ length: pageSize }).map((_, i) => (
-                <SkeletonRow key={i} cols={visibleCols + (isGold ? 0 : 1)} />
+                <SkeletonTableRow key={i} cols={visibleCols + (isGold ? 0 : 1)} />
               ))}
 
-            {!isLoading &&
-              isGold &&
+            {!isLoading && isGold &&
               pageGold.map((entry) => (
                 <tr
                   key={entry.data}
@@ -220,9 +173,7 @@ export function NbpGrid({
                   )}
                 >
                   {visibleAB('date') && (
-                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                      {entry.data}
-                    </td>
+                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{entry.data}</td>
                   )}
                   {visibleAB('price') && (
                     <td className="px-4 py-3 text-right font-medium tabular-nums">
@@ -232,9 +183,7 @@ export function NbpGrid({
                 </tr>
               ))}
 
-            {!isLoading &&
-              !isGold &&
-              !isTableC &&
+            {!isLoading && !isGold && !isTableC &&
               pageRates.map((rate) => {
                 const isFav = favorites.includes(rate.code);
                 return (
@@ -255,36 +204,19 @@ export function NbpGrid({
                       <span className="flex items-center gap-2">
                         {rate.code}
                         {onToggleFavorite && (
-                          <button
-                            type="button"
-                            aria-pressed={isFav}
-                            aria-label={isFav ? t('tiles.removeFavorite', { code: rate.code }) : t('tiles.addFavorite', { code: rate.code })}
-                            onClick={(e) => { e.stopPropagation(); onToggleFavorite(rate.code); }}
-                            className={cn(
-                              'rounded p-1.5 touch-manipulation transition-colors sm:p-0.5',
-                              'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                              isFav
-                                ? 'text-amber-500'
-                                : 'text-muted-foreground/40 sm:opacity-0 sm:group-hover:opacity-100',
-                            )}
-                          >
-                            <Star size={11} fill={isFav ? 'currentColor' : 'none'} aria-hidden="true" />
-                          </button>
+                          <FavoriteButton
+                            code={rate.code}
+                            isFavorite={isFav}
+                            onToggle={onToggleFavorite}
+                            variant="inline"
+                          />
                         )}
                         {onViewChart && (
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); onViewChart(rate.code); }}
-                            aria-label={t('grid.chartFor', { code: rate.code })}
-                            title={t('grid.chartFor', { code: rate.code })}
-                            className={cn(
-                              'rounded p-1.5 touch-manipulation text-muted-foreground/40 transition-opacity sm:p-0.5',
-                              'hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                              'sm:opacity-0 sm:group-hover:opacity-100',
-                            )}
-                          >
-                            <BarChart2 size={12} aria-hidden="true" />
-                          </button>
+                          <ViewChartButton
+                            code={rate.code}
+                            onViewChart={onViewChart}
+                            variant="row"
+                          />
                         )}
                       </span>
                     </td>
@@ -303,8 +235,7 @@ export function NbpGrid({
                 );
               })}
 
-            {!isLoading &&
-              isTableC &&
+            {!isLoading && isTableC &&
               pageRatesC.map((rate) => {
                 const isFav = favorites.includes(rate.code);
                 return (
@@ -325,35 +256,19 @@ export function NbpGrid({
                       <span className="flex items-center gap-2">
                         {rate.code}
                         {onToggleFavorite && (
-                          <button
-                            type="button"
-                            aria-pressed={isFav}
-                            aria-label={isFav ? t('tiles.removeFavorite', { code: rate.code }) : t('tiles.addFavorite', { code: rate.code })}
-                            onClick={() => onToggleFavorite(rate.code)}
-                            className={cn(
-                              'rounded p-1.5 touch-manipulation transition-colors sm:p-0.5',
-                              'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                              isFav
-                                ? 'text-amber-500'
-                                : 'text-muted-foreground/40 sm:opacity-0 sm:group-hover:opacity-100',
-                              )}
-                          >
-                            <Star size={11} fill={isFav ? 'currentColor' : 'none'} aria-hidden="true" />
-                          </button>
+                          <FavoriteButton
+                            code={rate.code}
+                            isFavorite={isFav}
+                            onToggle={onToggleFavorite}
+                            variant="inline"
+                          />
                         )}
                         {onViewChart && (
-                          <button
-                            type="button"
-                            onClick={() => onViewChart(rate.code)}
-                            aria-label={t('grid.chartFor', { code: rate.code })}
-                            title={t('grid.chartFor', { code: rate.code })}
-                            className={cn(
-                              'rounded p-1.5 touch-manipulation text-muted-foreground/40 transition-opacity sm:p-0.5',
-                              'hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                            )}
-                          >
-                            <BarChart2 size={12} aria-hidden="true" />
-                          </button>
+                          <ViewChartButton
+                            code={rate.code}
+                            onViewChart={onViewChart}
+                            variant="row"
+                          />
                         )}
                       </span>
                     </td>
@@ -377,27 +292,19 @@ export function NbpGrid({
                 );
               })}
 
-            {!isLoading && !hasData && (() => {
-              logger.debug('NbpGrid: no data', { tab });
-              return (
-                <tr>
-                  <td colSpan={cols} className="px-4 py-16 text-center text-sm text-muted-foreground">
-                    {t('grid.noData')}
-                  </td>
-                </tr>
-              );
-            })()}
+            {!isLoading && !hasData && (
+              <tr>
+                <td colSpan={cols} className="px-4 py-16 text-center text-sm text-muted-foreground">
+                  {t('grid.noData')}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
       {onPageChange && (
-        <Pagination
-          page={safePage}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
-          className="mt-4"
-        />
+        <Pagination page={safePage} totalPages={totalPages} onPageChange={onPageChange} className="mt-4" />
       )}
     </div>
   );
