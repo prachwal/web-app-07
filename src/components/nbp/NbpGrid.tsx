@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, RefreshCw, BarChart2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { NbpRate, NbpGoldPrice, NbpTab } from '@/store/api/nbpApi';
+import type { NbpRate, NbpRateC, NbpGoldPrice, NbpTab } from '@/store/api/nbpApi';
 
 const SKELETON_ROWS = 8;
 
@@ -11,6 +11,8 @@ export interface NbpGridProps {
   tab: NbpTab;
   /** Exchange rate rows to display (for tabs A and B). */
   rates?: NbpRate[];
+  /** Buy/sell rate rows to display (for tab C). */
+  ratesC?: NbpRateC[];
   /** Gold price rows to display (for the gold tab). */
   goldPrices?: NbpGoldPrice[];
   /** True on initial load when no cached data is available. */
@@ -29,6 +31,11 @@ export interface NbpGridProps {
   onGoldSelect: (price: NbpGoldPrice) => void;
   /** Callback fired when the user requests a retry after an error. */
   onRetry: () => void;
+  /**
+   * Optional callback fired when the user clicks the chart icon on a currency row.
+   * When provided, a small chart icon appears on hover for each currency row.
+   */
+  onViewChart?: (code: string) => void;
 }
 
 function SkeletonRow({ cols }: { cols: number }): React.JSX.Element {
@@ -58,6 +65,7 @@ function SkeletonRow({ cols }: { cols: number }): React.JSX.Element {
 export function NbpGrid({
   tab,
   rates = [],
+  ratesC = [],
   goldPrices = [],
   isLoading,
   isFetching,
@@ -67,11 +75,13 @@ export function NbpGrid({
   onRateSelect,
   onGoldSelect,
   onRetry,
+  onViewChart,
 }: NbpGridProps): React.JSX.Element {
   const { t } = useTranslation('nbp');
   const isGold = tab === 'gold';
-  const cols = isGold ? 2 : 3;
-  const hasData = isGold ? goldPrices.length > 0 : rates.length > 0;
+  const isTableC = tab === 'C';
+  const cols = isGold ? 2 : isTableC ? 4 : 3;
+  const hasData = isGold ? goldPrices.length > 0 : isTableC ? ratesC.length > 0 : rates.length > 0;
 
   /* ── error state ── */
   if (error) {
@@ -119,6 +129,21 @@ export function NbpGrid({
                     className="px-4 py-3 text-right font-medium text-muted-foreground"
                   >
                     {t('grid.price')}
+                  </th>
+                </>
+              ) : isTableC ? (
+                <>
+                  <th scope="col" className="px-4 py-3 font-medium text-muted-foreground w-20">
+                    {t('grid.code')}
+                  </th>
+                  <th scope="col" className="px-4 py-3 font-medium text-muted-foreground">
+                    {t('grid.currency')}
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-right font-medium text-muted-foreground">
+                    {t('grid.bid')}
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-right font-medium text-muted-foreground">
+                    {t('grid.ask')}
                   </th>
                 </>
               ) : (
@@ -172,9 +197,10 @@ export function NbpGrid({
                 </tr>
               ))}
 
-            {/* exchange rate rows */}
+            {/* exchange rate rows (A / B) */}
             {!isLoading &&
               !isGold &&
+              !isTableC &&
               rates.map((rate) => (
                 <tr
                   key={rate.code}
@@ -184,17 +210,73 @@ export function NbpGrid({
                   tabIndex={0}
                   aria-selected={selectedCode === rate.code}
                   className={cn(
-                    'cursor-pointer transition-colors hover:bg-muted/50',
+                    'group cursor-pointer transition-colors hover:bg-muted/50',
                     'focus-visible:outline-none focus-visible:bg-muted/50',
                     selectedCode === rate.code && 'bg-primary/5',
                   )}
                 >
                   <td className="px-4 py-3 font-mono text-xs font-semibold text-foreground">
-                    {rate.code}
+                    <span className="flex items-center gap-1">
+                      {rate.code}
+                      {onViewChart && (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); onViewChart(rate.code); }}
+                          aria-label={t('grid.chartFor', { code: rate.code })}
+                          title={t('grid.chartFor', { code: rate.code })}
+                          className={cn(
+                            'rounded p-0.5 text-muted-foreground opacity-0 transition-opacity',
+                            'hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                            'group-hover:opacity-100',
+                          )}
+                        >
+                          <BarChart2 size={12} aria-hidden="true" />
+                        </button>
+                      )}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{rate.currency}</td>
                   <td className="px-4 py-3 text-right font-medium tabular-nums">
                     {rate.mid.toFixed(4)}
+                  </td>
+                </tr>
+              ))}
+
+            {/* exchange rate rows (C — bid/ask) */}
+            {!isLoading &&
+              isTableC &&
+              ratesC.map((rate) => (
+                <tr
+                  key={rate.code}
+                  role="row"
+                  className="group transition-colors hover:bg-muted/50"
+                >
+                  <td className="px-4 py-3 font-mono text-xs font-semibold text-foreground">
+                    <span className="flex items-center gap-1">
+                      {rate.code}
+                      {onViewChart && (
+                        <button
+                          type="button"
+                          onClick={() => onViewChart(rate.code)}
+                          aria-label={t('grid.chartFor', { code: rate.code })}
+                          title={t('grid.chartFor', { code: rate.code })}
+                          className={cn(
+                            'rounded p-0.5 text-muted-foreground opacity-0 transition-opacity',
+                            'hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                            'group-hover:opacity-100',
+                          )}
+                        >
+                          <BarChart2 size={12} aria-hidden="true" />
+                        </button>
+                      )}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{rate.currency}</td>
+                  <td className="px-4 py-3 text-right font-medium tabular-nums">
+                    {rate.bid.toFixed(4)}
+                  </td>
+                  <td className="px-4 py-3 text-right font-medium tabular-nums">
+                    {rate.ask.toFixed(4)}
                   </td>
                 </tr>
               ))}

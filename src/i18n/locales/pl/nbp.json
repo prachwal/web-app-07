@@ -4,6 +4,7 @@
   "tabs": {
     "tableA": "Tabela A",
     "tableB": "Tabela B",
+    "tableC": "Tabela C",
     "gold": "Złoto"
   },
   "filters": {
@@ -17,11 +18,14 @@
     "code": "Kod",
     "currency": "Waluta",
     "mid": "Kurs średni (PLN)",
+    "bid": "Kupno (PLN)",
+    "ask": "Sprzedaż (PLN)",
     "date": "Data",
     "price": "Cena (PLN/g)",
     "no": "Nr tabeli",
     "noData": "Brak danych dla wybranych filtrów.",
-    "loading": "Ładowanie danych…"
+    "loading": "Ładowanie danych…",
+    "chartFor": "Pokaż wykres dla {{code}}"
   },
   "details": {
     "heading": "Szczegóły",
@@ -34,6 +38,32 @@
     "price": "Cena",
     "priceUnit": "PLN/g",
     "close": "Zamknij szczegóły"
+  },
+  "series": {
+    "heading": "Seria historyczna",
+    "selectCurrency": "Kod waluty (np. USD)",
+    "dateRange": "Zakres dat (maks. 93 dni)",
+    "periodError": "Zakres nie może przekraczać 93 dni.",
+    "viewChart": "Pokaż wykres",
+    "viewGrid": "Pokaż tabelę"
+  },
+  "chart": {
+    "heading": "Wykres kursu waluty",
+    "noData": "Brak danych — wybierz kod waluty i prawidłowy zakres dat.",
+    "axisDate": "Data",
+    "axisRate": "Kurs (PLN)",
+    "axisGold": "Cena (PLN/g)",
+    "mid": "Kurs średni",
+    "bid": "Kurs kupna",
+    "ask": "Kurs sprzedaży"
+  },
+  "tableDesc": {
+    "A": "Kursy średnich walut — główne waluty",
+    "B": "Kursy średnich walut — mniej popularne i egzotyczne",
+    "C": "Kursy kupna/sprzedaży (forex)",
+    "gold": "Cena spot złota w PLN za gram",
+    "info": "{{count}} walut · dane z {{date}}",
+    "goldInfo": "{{start}} – {{end}}"
   },
   "errors": {
     "fetch": "Nie udało się załadować danych. Spróbuj ponownie.",

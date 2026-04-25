@@ -81,3 +81,9 @@ artifacts/            gitignored — coverage/ and docs/
 - **Artifacts**: `/artifacts/` is gitignored — coverage reports and TypeDoc output live here
 - **No default exports** from component files; use named exports only
 - **Never edit** `pnpm-lock.yaml` or files under `artifacts/` directly
+
+## Planning
+- For new features, create a `plan.md` with a detailed implementation plan before writing code.
+- always translate plan to english, even if the original is in Polish or another language.
+- Include steps, relevant files, verification instructions, and any assumptions or decisions made.
+- Use the plan as a reference for implementation and testing, and update it if any changes are made during development.

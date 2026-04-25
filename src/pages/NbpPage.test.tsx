@@ -50,10 +50,11 @@ describe('NbpPage', () => {
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
   });
 
-  it('renders three tab buttons', () => {
+  it('renders four tab buttons (A, B, C, Gold)', () => {
     renderWithProviders(<NbpPage />);
     expect(screen.getByRole('tab', { name: /Table A|Tabela A/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Table B|Tabela B/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Table C|Tabela C/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Gold|Złoto/i })).toBeInTheDocument();
   });
 
@@ -137,6 +138,51 @@ describe('NbpPage', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
+    });
+  });
+
+  it('renders view-mode toggle buttons (grid / chart) for Table A', () => {
+    renderWithProviders(<NbpPage />);
+    expect(
+      screen.getByRole('button', { name: /show table|pokaż tabelę/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /show chart|pokaż wykres/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('switches to chart mode when chart button is clicked', async () => {
+    renderWithProviders(<NbpPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: /show chart|pokaż wykres/i }));
+
+    await waitFor(() => {
+      // Chart mode shows currency code input (role may be textbox or combobox with datalist)
+      expect(screen.getByLabelText(/currency code|kod waluty/i)).toBeInTheDocument();
+    });
+  });
+
+  it('shows Table C tab and bid/ask grid headings after switch', async () => {
+    const tableCResponse = [
+      {
+        table: 'C',
+        no: '081/C/NBP/2024',
+        tradingDate: '2024-04-25',
+        effectiveDate: '2024-04-25',
+        rates: [
+          { currency: 'dolar amerykański', code: 'USD', bid: 3.95, ask: 4.02 },
+        ],
+      },
+    ];
+    mockFetch(tableCResponse);
+    renderWithProviders(<NbpPage />);
+
+    fireEvent.click(screen.getByRole('tab', { name: /Table C|Tabela C/i }));
+
+    await waitFor(() => {
+      // Table C description bar + grid headers both contain 'Buy'; assert at least one present
+      expect(screen.getAllByText(/Buy|Kupno/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Sell|Sprzeda/i).length).toBeGreaterThan(0);
     });
   });
 });

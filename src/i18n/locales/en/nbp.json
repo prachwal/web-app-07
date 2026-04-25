@@ -4,6 +4,7 @@
   "tabs": {
     "tableA": "Table A",
     "tableB": "Table B",
+    "tableC": "Table C",
     "gold": "Gold"
   },
   "filters": {
@@ -17,11 +18,14 @@
     "code": "Code",
     "currency": "Currency",
     "mid": "Mid rate (PLN)",
+    "bid": "Buy (PLN)",
+    "ask": "Sell (PLN)",
     "date": "Date",
     "price": "Price (PLN/g)",
     "no": "Table no.",
     "noData": "No data for the selected filters.",
-    "loading": "Loading data…"
+    "loading": "Loading data…",
+    "chartFor": "Show chart for {{code}}"
   },
   "details": {
     "heading": "Details",
@@ -34,6 +38,32 @@
     "price": "Price",
     "priceUnit": "PLN/g",
     "close": "Close details"
+  },
+  "series": {
+    "heading": "Historical series",
+    "selectCurrency": "Currency code (e.g. USD)",
+    "dateRange": "Date range (max 93 days)",
+    "periodError": "The range cannot exceed 93 days.",
+    "viewChart": "Show chart",
+    "viewGrid": "Show table"
+  },
+  "chart": {
+    "heading": "Exchange rate chart",
+    "noData": "No data — select a currency code and a valid date range.",
+    "axisDate": "Date",
+    "axisRate": "Rate (PLN)",
+    "axisGold": "Price (PLN/g)",
+    "mid": "Mid rate",
+    "bid": "Buy rate",
+    "ask": "Sell rate"
+  },
+  "tableDesc": {
+    "A": "Average exchange rates — major currencies",
+    "B": "Average exchange rates — minor and exotic currencies",
+    "C": "Buy / sell foreign-exchange rates",
+    "gold": "Spot gold price in PLN per gram",
+    "info": "{{count}} currencies · as of {{date}}",
+    "goldInfo": "{{start}} – {{end}}"
   },
   "errors": {
     "fetch": "Failed to load data. Please try again.",
