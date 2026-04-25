@@ -19,6 +19,6 @@
       "@shared": ["./packages/shared/src/index.ts"]
     }
   },
-  "include": ["src", "packages/shared/src", "eslint.config.ts", "vite.config.ts"],
+  "include": ["src", "packages/shared/src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
