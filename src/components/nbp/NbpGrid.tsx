@@ -270,7 +270,7 @@ export function NbpGrid({
                             aria-label={isFav ? t('tiles.removeFavorite', { code: rate.code }) : t('tiles.addFavorite', { code: rate.code })}
                             onClick={(e) => { e.stopPropagation(); onToggleFavorite(rate.code); }}
                             className={cn(
-                              'rounded p-0.5 transition-colors',
+                              'rounded p-1.5 touch-manipulation transition-colors sm:p-0.5',
                               'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
                               isFav
                                 ? 'text-amber-500'
@@ -287,7 +287,7 @@ export function NbpGrid({
                             aria-label={t('grid.chartFor', { code: rate.code })}
                             title={t('grid.chartFor', { code: rate.code })}
                             className={cn(
-                              'rounded p-0.5 text-muted-foreground/40 transition-opacity',
+                              'rounded p-1.5 touch-manipulation text-muted-foreground/40 transition-opacity sm:p-0.5',
                               'hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
                               'sm:opacity-0 sm:group-hover:opacity-100',
                             )}
@@ -297,7 +297,11 @@ export function NbpGrid({
                         )}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{rate.currency}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      <span className="block max-w-[140px] truncate sm:max-w-none" title={rate.currency}>
+                        {rate.currency}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-right font-medium tabular-nums">
                       {rate.mid.toFixed(4)}
                     </td>
@@ -326,7 +330,7 @@ export function NbpGrid({
                             aria-label={isFav ? t('tiles.removeFavorite', { code: rate.code }) : t('tiles.addFavorite', { code: rate.code })}
                             onClick={() => onToggleFavorite(rate.code)}
                             className={cn(
-                              'rounded p-0.5 transition-colors',
+                              'rounded p-1.5 touch-manipulation transition-colors sm:p-0.5',
                               'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
                               isFav
                                 ? 'text-amber-500'
@@ -343,7 +347,7 @@ export function NbpGrid({
                             aria-label={t('grid.chartFor', { code: rate.code })}
                             title={t('grid.chartFor', { code: rate.code })}
                             className={cn(
-                              'rounded p-0.5 text-muted-foreground/40 transition-opacity',
+                              'rounded p-1.5 touch-manipulation text-muted-foreground/40 transition-opacity sm:p-0.5',
                               'hover:text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
                               'sm:opacity-0 sm:group-hover:opacity-100',
                             )}
@@ -353,7 +357,11 @@ export function NbpGrid({
                         )}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{rate.currency}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      <span className="block max-w-[140px] truncate sm:max-w-none" title={rate.currency}>
+                        {rate.currency}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-right font-medium tabular-nums">
                       {rate.bid.toFixed(4)}
                     </td>

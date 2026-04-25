@@ -334,16 +334,16 @@ export function NbpPage(): React.JSX.Element {
 
   return (
     <PageLayout>
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-10 lg:px-8">
         <motion.div
           initial={reducedMotion ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
         >
           {/* Page header */}
-          <header className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('title')}</h1>
-            <p className="mt-2 text-sm text-muted-foreground">{t('subtitle')}</p>
+          <header className="mb-4 sm:mb-8">
+            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-3xl">{t('title')}</h1>
+            <p className="mt-1 text-xs text-muted-foreground sm:mt-2 sm:text-sm">{t('subtitle')}</p>
           </header>
 
           {/* Filters */}
@@ -369,10 +369,10 @@ export function NbpPage(): React.JSX.Element {
           </div>
 
           {/* Table description bar — short auto-generated summary from API data */}
-          <div className="mb-5 rounded-lg border border-border/60 bg-muted/30 px-4 py-2 text-sm">
+          <div className="mb-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs sm:mb-5 sm:px-4 sm:text-sm">
             <span className="font-medium text-foreground">{t(`tableDesc.${tab}`)}</span>
             {activeEntry && (
-              <span className="ml-2 text-muted-foreground">
+              <span className="ml-1 text-muted-foreground sm:ml-2">
                 {'· '}
                 {t('tableDesc.info', {
                   count: activeEntry.rates.length,
@@ -381,7 +381,7 @@ export function NbpPage(): React.JSX.Element {
               </span>
             )}
             {tab === 'gold' && (
-              <span className="ml-2 text-muted-foreground">
+              <span className="ml-1 text-muted-foreground sm:ml-2">
                 {'· '}
                 {t('tableDesc.goldInfo', { start: startDate, end: endDate })}
               </span>

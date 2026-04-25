@@ -107,13 +107,14 @@ export function NbpFilters({
   const endInputRef   = useRef<HTMLInputElement>(null);
   return (
     <div className="flex flex-col gap-4">
-      {/* ── Tab selector ── */}
-      <div className="flex items-center gap-3 flex-wrap">
+      {/* ── Tab selector + view-mode toggle (single combined row) ── */}
+      <div className="flex items-center gap-2">
         <div
           role="tablist"
           aria-label={t('title')}
           className={cn(
-            'flex gap-1 rounded-lg border border-border bg-muted/40 p-1',
+            'flex min-w-0 flex-1 gap-1 overflow-x-auto rounded-lg border border-border bg-muted/40 p-1',
+            '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
             'transition-opacity duration-150',
             isPending && 'opacity-70',
           )}
@@ -126,7 +127,7 @@ export function NbpFilters({
               type="button"
               onClick={() => onTabChange(id)}
               className={cn(
-                'rounded-md px-4 py-2 text-sm font-medium transition-colors',
+                'whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors sm:px-4 sm:py-2',
                 tab === id
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground',
@@ -138,12 +139,11 @@ export function NbpFilters({
         </div>
 
         {/* ── View mode toggle (grid / tiles / chart) ── */}
-        {(
-          <div
-            role="group"
-            aria-label={t('series.viewMode')}
-            className="flex gap-1 rounded-lg border border-border bg-muted/40 p-1"
-          >
+        <div
+          role="group"
+          aria-label={t('series.viewMode')}
+          className="flex shrink-0 gap-1 rounded-lg border border-border bg-muted/40 p-1"
+        >
             <button
               type="button"
               aria-pressed={viewMode === 'grid'}
@@ -190,8 +190,7 @@ export function NbpFilters({
               <BarChart2 size={16} aria-hidden="true" />
             </button>
           </div>
-        )}
-      </div>
+        </div>
 
       {/* ── Search input — grid/tiles mode for A / B / C ── */}
       {tab !== 'gold' && viewMode !== 'chart' && (
@@ -238,7 +237,7 @@ export function NbpFilters({
                 'rounded-md border border-border bg-background px-3 py-2 text-sm font-mono uppercase',
                 'placeholder:text-muted-foreground',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                compactCurrency ? 'w-16' : 'w-24',
+                compactCurrency ? 'w-[4.5rem]' : 'w-24',
               )}
             />
             {availableCodes.length > 0 && (
