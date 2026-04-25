@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, RefreshCw, BarChart2, Star, Settings2 } from 'lucide-react';
+import { AlertCircle, RefreshCw, BarChart2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Pagination } from '@/components/ui/Pagination';
 import * as logger from '@/lib/logger';
@@ -12,7 +12,6 @@ const SKELETON_ROWS = 8;
 const PAGE_SIZE = 20;
 
 export interface NbpGridProps {
-  onOpenSettings?: () => void;
   tab: NbpTab;
   rates?: NbpRate[];
   ratesC?: NbpRateC[];
@@ -23,6 +22,7 @@ export interface NbpGridProps {
   selectedCode?: string | null;
   selectedGoldDate?: string | null;
   onRateSelect: (rate: NbpRate) => void;
+  onRateCSelect?: (rate: NbpRateC) => void;
   onGoldSelect: (price: NbpGoldPrice) => void;
   onRetry: () => void;
   onViewChart?: (code: string) => void;
@@ -62,7 +62,7 @@ export function NbpGrid({
   onToggleFavorite,
   page = 1,
   onPageChange,
-  onOpenSettings,
+  onRateCSelect,
 }: NbpGridProps): React.JSX.Element {
   const { t } = useTranslation('nbp');
   const isGold = tab === 'gold';
@@ -176,19 +176,7 @@ export function NbpGrid({
                       <span className="sm:hidden">Sell</span>
                     </th>
                   )}
-                  <th scope="col" className="w-8 px-2 py-3">
-                    {onOpenSettings && (
-                      <button
-                        type="button"
-                        onClick={onOpenSettings}
-                        aria-label={t('grid.settings')}
-                        title={t('grid.settings')}
-                        className="rounded p-1 text-muted-foreground/50 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                      >
-                        <Settings2 size={14} aria-hidden="true" />
-                      </button>
-                    )}
-                  </th>
+                  <th scope="col" className="w-8 px-2 py-3" />
                 </>
               ) : (
                 <>
@@ -209,19 +197,7 @@ export function NbpGrid({
                       <span className="sm:hidden">Mid</span>
                     </th>
                   )}
-                  <th scope="col" className="w-8 px-2 py-3">
-                    {onOpenSettings && (
-                      <button
-                        type="button"
-                        onClick={onOpenSettings}
-                        aria-label={t('grid.settings')}
-                        title={t('grid.settings')}
-                        className="rounded p-1 text-muted-foreground/50 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                      >
-                        <Settings2 size={14} aria-hidden="true" />
-                      </button>
-                    )}
-                  </th>
+                  <th scope="col" className="w-8 px-2 py-3" />
                 </>
               )}
             </tr>
@@ -339,8 +315,16 @@ export function NbpGrid({
                 return (
                   <tr
                     key={rate.code}
+                    onClick={() => onRateCSelect?.(rate)}
+                    onKeyDown={(e) => e.key === 'Enter' && onRateCSelect?.(rate)}
                     role="row"
-                    className="group transition-colors hover:bg-muted/50"
+                    tabIndex={onRateCSelect ? 0 : undefined}
+                    aria-selected={selectedCode === rate.code}
+                    className={cn(
+                      'group transition-colors hover:bg-muted/50',
+                      onRateCSelect && 'cursor-pointer focus-visible:outline-none focus-visible:bg-muted/50',
+                      selectedCode === rate.code && 'bg-primary/5',
+                    )}
                   >
                     <td className="px-4 py-3 font-mono text-xs font-semibold text-foreground">
                       <span className="flex items-center gap-2">

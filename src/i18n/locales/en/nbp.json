@@ -12,7 +12,14 @@
     "startDate": "From",
     "endDate": "To",
     "clear": "Reset dates",
-    "apply": "Apply"
+    "apply": "Apply",
+    "sortBy": "Sort by",
+    "sortDefault": "Default",
+    "sortCode": "Code",
+    "sortMid": "Mid rate",
+    "sortBid": "Buy rate",
+    "sortAsk": "Sell rate",
+    "sortFavorites": "Favourites first"
   },
   "grid": {
     "code": "Code",

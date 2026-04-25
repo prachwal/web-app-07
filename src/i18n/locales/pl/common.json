@@ -26,6 +26,7 @@
   "a11y": {
     "skipToContent": "Przejdź do głównej treści",
     "openMenu": "Otwórz menu nawigacyjne",
-    "closeMenu": "Zamknij menu nawigacyjne"
+    "closeMenu": "Zamknij menu nawigacyjne",
+    "back": "Wróć"
   }
 }

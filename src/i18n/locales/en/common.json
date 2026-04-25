@@ -26,6 +26,7 @@
   "a11y": {
     "skipToContent": "Skip to main content",
     "openMenu": "Open navigation menu",
-    "closeMenu": "Close navigation menu"
+    "closeMenu": "Close navigation menu",
+    "back": "Back"
   }
 }

@@ -1,9 +1,10 @@
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, X, BarChart2, TableProperties, LayoutGrid, Calendar } from 'lucide-react';
+import { Search, X, BarChart2, TableProperties, LayoutGrid, Calendar, ArrowUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/lib/useBreakpoint';
 import type { NbpTab } from '@/store/api/nbpApi';
+import type { SortField } from '@/pages/NbpPage';
 
 const TABS: { id: NbpTab; labelKey: string }[] = [
   { id: 'A', labelKey: 'tabs.tableA' },
@@ -37,6 +38,8 @@ export interface NbpFiltersProps {
   chartDateError: string | null;
   availableCodes?: string[];
   compact?: CompactOptions;
+  sortBy?: SortField;
+  onSortByChange?: (sort: SortField) => void;
 }
 
 export function NbpFilters({
@@ -57,6 +60,8 @@ export function NbpFilters({
   chartDateError,
   availableCodes = [],
   compact,
+  sortBy = 'default',
+  onSortByChange,
 }: NbpFiltersProps): React.JSX.Element {
   const { t } = useTranslation('nbp');
   const isMobile = useIsMobile();
@@ -152,24 +157,47 @@ export function NbpFilters({
         </div>
 
       {tab !== 'gold' && viewMode !== 'chart' && (
-        <div className="relative">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            aria-hidden="true"
-          />
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={t('filters.search')}
-            aria-label={t('filters.search')}
-            className={cn(
-              'w-full rounded-md border border-border bg-background py-2 pl-9 pr-4 text-sm',
-              'placeholder:text-muted-foreground',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-            )}
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder={t('filters.search')}
+              aria-label={t('filters.search')}
+              className={cn(
+                'w-full rounded-md border border-border bg-background py-2 pl-9 pr-4 text-sm',
+                'placeholder:text-muted-foreground',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              )}
+            />
+          </div>
+          {onSortByChange && (
+            <div className="flex shrink-0 items-center gap-1">
+              <ArrowUpDown size={14} className="text-muted-foreground" aria-hidden="true" />
+              <select
+                value={sortBy}
+                onChange={(e) => onSortByChange(e.target.value as SortField)}
+                aria-label={t('filters.sortBy')}
+                className={cn(
+                  'rounded-md border border-border bg-background py-2 pl-2 pr-6 text-sm',
+                  'text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                )}
+              >
+                <option value="default">{t('filters.sortDefault')}</option>
+                <option value="code">{t('filters.sortCode')}</option>
+                {(tab === 'A' || tab === 'B') && <option value="mid">{t('filters.sortMid')}</option>}
+                {tab === 'C' && <option value="bid">{t('filters.sortBid')}</option>}
+                {tab === 'C' && <option value="ask">{t('filters.sortAsk')}</option>}
+                <option value="favorites">{t('filters.sortFavorites')}</option>
+              </select>
+            </div>
+          )}
         </div>
       )}
 
@@ -320,7 +348,7 @@ export function NbpFilters({
               type="button"
               onClick={onClear}
               className={cn(
-                'flex items-center gap-2 rounded-md border border-destructive/50 px-3 py-2',
+                'ml-auto flex items-center gap-2 rounded-md border border-destructive/50 px-3 py-2',
                 'text-sm text-destructive transition-colors hover:bg-destructive/10',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               )}
@@ -454,7 +482,7 @@ export function NbpFilters({
               type="button"
               onClick={onClear}
               className={cn(
-                'flex items-center gap-2 rounded-md border border-border px-3 py-2',
+                'ml-auto flex items-center gap-2 rounded-md border border-border px-3 py-2',
                 'text-sm text-muted-foreground transition-colors hover:text-foreground',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               )}

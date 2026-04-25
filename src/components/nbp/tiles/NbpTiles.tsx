@@ -18,6 +18,9 @@ export interface NbpTilesProps {
   favorites: string[];
   onToggleFavorite: (code: string) => void;
   onViewChart?: (code: string) => void;
+  onRateSelect?: (rate: NbpRate) => void;
+  onRateCSelect?: (rate: NbpRateC) => void;
+  onGoldSelect?: (price: NbpGoldPrice) => void;
   onRetry: () => void;
   page: number;
   onPageChange: (page: number) => void;
@@ -47,6 +50,9 @@ export function NbpTiles({
   favorites,
   onToggleFavorite,
   onViewChart,
+  onRateSelect,
+  onRateCSelect,
+  onGoldSelect,
   onRetry,
   page,
   onPageChange,
@@ -135,9 +141,15 @@ export function NbpTiles({
             return (
               <div
                 key={rate.code}
+                onClick={onRateSelect ? () => onRateSelect(rate) : undefined}
+                onKeyDown={onRateSelect ? (e) => { if (e.key === 'Enter' || e.key === ' ') onRateSelect(rate); } : undefined}
+                role="button"
+                tabIndex={0}
+                aria-label={`${rate.code} ${rate.currency}`}
                 className={cn(
                   'group relative flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors',
                   'hover:border-primary/40 hover:bg-muted/30',
+                  onRateSelect && 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   isFav && 'border-amber-400/60 bg-amber-50/5',
                 )}
               >
@@ -145,7 +157,7 @@ export function NbpTiles({
                   type="button"
                   aria-pressed={isFav}
                   aria-label={isFav ? t('tiles.removeFavorite', { code: rate.code }) : t('tiles.addFavorite', { code: rate.code })}
-                  onClick={() => onToggleFavorite(rate.code)}
+                  onClick={(e) => { e.stopPropagation(); onToggleFavorite(rate.code); }}
                   className={cn(
                     'absolute right-2 top-2 rounded p-0.5 transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -190,9 +202,15 @@ export function NbpTiles({
             return (
               <div
                 key={rate.code}
+                onClick={onRateCSelect ? () => onRateCSelect(rate) : undefined}
+                onKeyDown={onRateCSelect ? (e) => { if (e.key === 'Enter' || e.key === ' ') onRateCSelect(rate); } : undefined}
+                role="button"
+                tabIndex={0}
+                aria-label={`${rate.code} ${rate.currency}`}
                 className={cn(
                   'group relative flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors',
                   'hover:border-primary/40 hover:bg-muted/30',
+                  onRateCSelect && 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   isFav && 'border-amber-400/60 bg-amber-50/5',
                 )}
               >
@@ -200,7 +218,7 @@ export function NbpTiles({
                   type="button"
                   aria-pressed={isFav}
                   aria-label={isFav ? t('tiles.removeFavorite', { code: rate.code }) : t('tiles.addFavorite', { code: rate.code })}
-                  onClick={() => onToggleFavorite(rate.code)}
+                  onClick={(e) => { e.stopPropagation(); onToggleFavorite(rate.code); }}
                   className={cn(
                     'absolute right-2 top-2 rounded p-0.5 transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -249,7 +267,15 @@ export function NbpTiles({
             return (
               <div
                 key={entry.data}
-                className="group relative flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:border-amber-400/40 hover:bg-muted/30"
+                onClick={onGoldSelect ? () => onGoldSelect(entry) : undefined}
+                onKeyDown={onGoldSelect ? (e) => { if (e.key === 'Enter' || e.key === ' ') onGoldSelect(entry); } : undefined}
+                role="button"
+                tabIndex={0}
+                aria-label={`${t('grid.date')} ${entry.data}: ${entry.cena.toFixed(2)} PLN/g`}
+                className={cn(
+                  'group relative flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:border-amber-400/40 hover:bg-muted/30',
+                  onGoldSelect && 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                )}
               >
                 <span className="font-mono text-xs text-muted-foreground">{entry.data}</span>
                 <span className="mt-1 text-lg font-bold tabular-nums text-amber-600">

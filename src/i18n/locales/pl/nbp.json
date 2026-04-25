@@ -12,7 +12,14 @@
     "startDate": "Od",
     "endDate": "Do",
     "clear": "Resetuj daty",
-    "apply": "Zastosuj"
+    "apply": "Zastosuj",
+    "sortBy": "Sortuj wg",
+    "sortDefault": "Domyślnie",
+    "sortCode": "Kod",
+    "sortMid": "Kurs średni",
+    "sortBid": "Kurs kupna",
+    "sortAsk": "Kurs sprzedaży",
+    "sortFavorites": "Ulubione pierwsze"
   },
   "grid": {
     "code": "Kod",

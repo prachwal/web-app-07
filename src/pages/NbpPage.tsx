@@ -2,8 +2,12 @@ import { useState, useEffect, useTransition, useDeferredValue, useMemo, useCallb
 import { useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'motion/react';
+import { Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/lib/useBreakpoint';
+import { useAppSelector } from '@/store';
+import { selectAxisPresentation } from '@/store/slices/tableSettingsSlice';
+import type { NbpTableGroup } from '@/store/slices/tableSettingsSlice';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { NbpFilters } from '@/components/nbp/filters/NbpFilters';
 import { NbpGrid } from '@/components/nbp/grid/NbpGrid';
@@ -22,6 +26,7 @@ import {
   type NbpTab,
   type NbpTableType,
   type NbpRate,
+  type NbpRateC,
   type NbpGoldPrice,
 } from '@/store/api/nbpApi';
 
@@ -42,6 +47,8 @@ const VALID_TABS: NbpTab[] = ['A', 'B', 'C', 'gold'];
 
 const VALID_VIEWS = ['grid', 'chart', 'tiles'] as const;
 type ViewMode = (typeof VALID_VIEWS)[number];
+
+export type SortField = 'default' | 'code' | 'mid' | 'bid' | 'ask' | 'favorites';
 
 const LS_VIEW_KEY = 'nbp:view';
 const LS_FAVORITES_KEY = 'nbp:favorites';
@@ -111,6 +118,11 @@ export function NbpPage(): React.JSX.Element {
   const deferredSearch = useDeferredValue(search);
   const [selection, setSelection] = useState<NbpSelection | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<SortField>('default');
+
+  /* ── axis presentation from Redux (follows active tab group) ── */
+  const chartGroup: NbpTableGroup = tab === 'gold' ? 'gold' : tab === 'C' ? 'C' : tab;
+  const chartAxisPresentation = useAppSelector(selectAxisPresentation(chartGroup));
 
   /* ── favorites (localStorage-persisted) ── */
   const [favorites, setFavorites] = useState<string[]>(() => lsGet<string[]>(LS_FAVORITES_KEY) ?? []);
@@ -214,12 +226,23 @@ export function NbpPage(): React.JSX.Element {
 
   const filteredRates = useMemo<NbpRate[]>(() => {
     const rates = tableEntry?.rates ?? [];
-    if (!deferredSearch) return rates;
-    const q = deferredSearch.toLowerCase();
-    return rates.filter(
-      (r) => r.code.toLowerCase().includes(q) || r.currency.toLowerCase().includes(q),
-    );
-  }, [tableEntry, deferredSearch]);
+    const searched = deferredSearch
+      ? rates.filter((r) => {
+          const q = deferredSearch.toLowerCase();
+          return r.code.toLowerCase().includes(q) || r.currency.toLowerCase().includes(q);
+        })
+      : rates;
+    if (sortBy === 'default') return searched;
+    if (sortBy === 'code') return [...searched].sort((a, b) => a.code.localeCompare(b.code));
+    if (sortBy === 'mid') return [...searched].sort((a, b) => b.mid - a.mid);
+    if (sortBy === 'favorites')
+      return [...searched].sort((a, b) => {
+        const af = favorites.includes(a.code) ? 0 : 1;
+        const bf = favorites.includes(b.code) ? 0 : 1;
+        return af - bf;
+      });
+    return searched;
+  }, [tableEntry, deferredSearch, sortBy, favorites]);
 
   const goldPrices = goldQuery.data ?? [];
 
@@ -279,6 +302,15 @@ export function NbpPage(): React.JSX.Element {
     });
   };
 
+  const handleRateCSelect = useCallback((rate: NbpRateC) => {
+    if (!tableCEntry) return;
+    setSelection({
+      type: 'rateC',
+      rate,
+      effectiveDate: tableCEntry.effectiveDate,
+    });
+  }, [tableCEntry]);
+
   const handleGoldSelect = (price: NbpGoldPrice) => {
     setSelection({ type: 'gold', goldPrice: price });
   };
@@ -324,7 +356,8 @@ export function NbpPage(): React.JSX.Element {
         : seriesABQuery.isLoading || seriesABQuery.isFetching;
 
   const selectedCode =
-    selection?.type === 'rate' ? selection.rate.code : null;
+    selection?.type === 'rate' ? selection.rate.code :
+    selection?.type === 'rateC' ? selection.rate.code : null;
   const selectedGoldDate =
     selection?.type === 'gold' ? selection.goldPrice.data : null;
 
@@ -348,7 +381,7 @@ export function NbpPage(): React.JSX.Element {
             <p className="mt-1 text-xs text-muted-foreground sm:mt-2 sm:text-sm">{t('subtitle')}</p>
           </header>
 
-          {/* Filters */}
+          {/* Filters + sort */}
           <div className="mb-4">
             <NbpFilters
               tab={tab}
@@ -367,33 +400,52 @@ export function NbpPage(): React.JSX.Element {
               onChartCodeChange={(v) => updateParams({ code: v })}
               chartDateError={chartDateError}
               availableCodes={availableCodes}
+              sortBy={sortBy}
+              onSortByChange={setSortBy}
             />
           </div>
 
-          {/* Table description bar — short auto-generated summary from API data */}
-          <div className="mb-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs sm:mb-5 sm:px-4 sm:text-sm">
-            <span className="font-medium text-foreground">{t(`tableDesc.${tab}`)}</span>
-            {activeEntry && (
-              <>
-                <br className="sm:hidden" />
-                <span className="text-muted-foreground sm:ml-2">
-                  <span className="hidden sm:inline">{'· '}</span>
-                  {t('tableDesc.info', {
-                    count: activeEntry.rates.length,
-                    date: activeEntry.effectiveDate,
-                  })}
-                </span>
-              </>
-            )}
-            {tab === 'gold' && (
-              <>
-                <br className="sm:hidden" />
-                <span className="text-muted-foreground sm:ml-2">
-                  <span className="hidden sm:inline">{'· '}</span>
-                  {t('tableDesc.goldInfo', { start: startDate, end: endDate })}
-                </span>
-              </>
-            )}
+          {/* Table description bar — summary + settings button (shared for grid/chart/tiles) */}
+          <div className="relative mb-3 flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs sm:mb-5 sm:px-4 sm:text-sm">
+            <div className="flex-1">
+              <span className="font-medium text-foreground">{t(`tableDesc.${tab}`)}</span>
+              {activeEntry && (
+                <>
+                  <br className="sm:hidden" />
+                  <span className="text-muted-foreground sm:ml-2">
+                    <span className="hidden sm:inline">{'· '}</span>
+                    {t('tableDesc.info', {
+                      count: activeEntry.rates.length,
+                      date: activeEntry.effectiveDate,
+                    })}
+                  </span>
+                </>
+              )}
+              {tab === 'gold' && (
+                <>
+                  <br className="sm:hidden" />
+                  <span className="text-muted-foreground sm:ml-2">
+                    <span className="hidden sm:inline">{'· '}</span>
+                    {t('tableDesc.goldInfo', { start: startDate, end: endDate })}
+                  </span>
+                </>
+              )}
+            </div>
+            {/* Settings button — shared control for grid, chart, and tiles */}
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(true)}
+              aria-label={t('grid.settings')}
+              title={t('grid.settings')}
+              className={cn(
+                'shrink-0 rounded-md p-1.5 text-muted-foreground/60 transition-colors',
+                'hover:bg-muted hover:text-foreground',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                settingsOpen && 'bg-muted text-foreground',
+              )}
+            >
+              <Settings2 size={15} aria-hidden="true" />
+            </button>
           </div>
 
           {/* Main content */}
@@ -403,7 +455,8 @@ export function NbpPage(): React.JSX.Element {
               data={chartData}
               isLoading={chartIsLoading}
               tab={tab}
-              currency={chartCode || (tab === 'gold' ? '' : '')}
+              currency={chartCode}
+              axisPresentation={chartAxisPresentation}
             />
           ) : showTiles ? (
             /* Tiles (kafelki) view */
@@ -418,6 +471,9 @@ export function NbpPage(): React.JSX.Element {
               favorites={favorites}
               onToggleFavorite={toggleFavorite}
               onViewChart={tab !== 'gold' ? handleViewChart : undefined}
+              onRateSelect={handleRateSelect}
+              onRateCSelect={handleRateCSelect}
+              onGoldSelect={handleGoldSelect}
               onRetry={handleRetry}
               page={tilesPage}
               onPageChange={setTilesPage}
@@ -442,6 +498,7 @@ export function NbpPage(): React.JSX.Element {
                   selectedCode={selectedCode}
                   selectedGoldDate={selectedGoldDate}
                   onRateSelect={handleRateSelect}
+                  onRateCSelect={handleRateCSelect}
                   onGoldSelect={handleGoldSelect}
                   onRetry={handleRetry}
                   onViewChart={tab !== 'gold' ? handleViewChart : undefined}
@@ -449,7 +506,6 @@ export function NbpPage(): React.JSX.Element {
                   onToggleFavorite={toggleFavorite}
                   page={gridPage}
                   onPageChange={setGridPage}
-                  onOpenSettings={() => setSettingsOpen(true)}
                 />
 
                 {/* Desktop inline details panel — hidden on mobile (uses BottomSheet instead) */}
@@ -479,9 +535,18 @@ export function NbpPage(): React.JSX.Element {
               <TableSettingsModal
                 open={settingsOpen}
                 onClose={() => setSettingsOpen(false)}
-                group={tab === 'gold' ? 'gold' : tab === 'C' ? 'C' : tab}
+                group={chartGroup}
               />
             </>
+          )}
+
+          {/* Settings modal for chart and tiles views */}
+          {(showChart || showTiles) && (
+            <TableSettingsModal
+              open={settingsOpen}
+              onClose={() => setSettingsOpen(false)}
+              group={chartGroup}
+            />
           )}
         </motion.div>
       </div>
