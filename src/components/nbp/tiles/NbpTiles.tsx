@@ -3,9 +3,9 @@ import { Star, BarChart2, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Pagination } from '@/components/ui/Pagination';
 import * as logger from '@/lib/logger';
+import { useAppSelector } from '@/store';
+import { selectGroupSettings } from '@/store/slices/tableSettingsSlice';
 import type { NbpRate, NbpRateC, NbpGoldPrice, NbpTab } from '@/store/api/nbpApi';
-
-const PAGE_SIZE = 12;
 
 export interface NbpTilesProps {
   tab: NbpTab;
@@ -60,6 +60,9 @@ export function NbpTiles({
   const { t } = useTranslation('nbp');
   const isGold = tab === 'gold';
   const isTableC = tab === 'C';
+  const groupSettings = useAppSelector(selectGroupSettings(tab));
+  const pageSize = groupSettings.layout.tileItemsPerPage;
+  const tileColumns = groupSettings.layout.tileColumns;
 
   if (error) {
     return (
@@ -100,23 +103,30 @@ export function NbpTiles({
   const sortedGold = [...goldPrices];
 
   const totalItems = isGold ? sortedGold.length : isTableC ? sortedRatesC.length : sortedRates.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safePage = Math.min(Math.max(1, page), totalPages);
-  const offset = (safePage - 1) * PAGE_SIZE;
+  const offset = (safePage - 1) * pageSize;
 
-  const pageRates = sortedRates.slice(offset, offset + PAGE_SIZE);
-  const pageRatesC = sortedRatesC.slice(offset, offset + PAGE_SIZE);
-  const pageGold = sortedGold.slice(offset, offset + PAGE_SIZE);
+  const pageRates = sortedRates.slice(offset, offset + pageSize);
+  const pageRatesC = sortedRatesC.slice(offset, offset + pageSize);
+  const pageGold = sortedGold.slice(offset, offset + pageSize);
 
   if (isLoading) {
     return (
       <div>
         <div
-          className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
+          className={cn(
+            'grid gap-3',
+            tileColumns === 2
+              ? 'grid-cols-1 sm:grid-cols-2'
+              : tileColumns === 3
+                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4',
+          )}
           aria-busy="true"
           aria-label={t('grid.loading')}
         >
-          {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+          {Array.from({ length: pageSize }).map((_, i) => (
             <SkeletonTile key={i} />
           ))}
         </div>
@@ -133,7 +143,16 @@ export function NbpTiles({
 
   return (
     <div className={cn('flex flex-col gap-4', isFetching && !isLoading && 'opacity-60')}>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+      <div
+        className={cn(
+          'grid gap-3',
+          tileColumns === 2
+            ? 'grid-cols-1 sm:grid-cols-2'
+            : tileColumns === 3
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+              : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4',
+        )}
+      >
         {!isGold &&
           !isTableC &&
           pageRates.map((rate) => {

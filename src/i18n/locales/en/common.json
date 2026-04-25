@@ -1,5 +1,6 @@
 {
   "nav": {
+    "menu": "Menu",
     "home": "Home",
     "about": "About",
     "contact": "Contact",
@@ -28,5 +29,8 @@
     "openMenu": "Open navigation menu",
     "closeMenu": "Close navigation menu",
     "back": "Back"
+  },
+  "notifications": {
+    "close": "Close notification"
   }
 }

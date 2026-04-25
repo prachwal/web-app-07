@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import type { Notification } from '@/store/slices/notificationsSlice';
@@ -32,6 +33,7 @@ export function NotificationToast({
   notification,
   onDismiss,
 }: NotificationToastProps): React.JSX.Element {
+  const { t } = useTranslation('common');
   const reducedMotion = useReducedMotion();
   const duration = notification.duration ?? 4000;
 
@@ -50,8 +52,8 @@ export function NotificationToast({
       exit={reducedMotion ? undefined : { opacity: 0, x: 64 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        'flex items-start gap-3 rounded-lg border px-4 py-3 shadow-md',
-        'min-w-64 max-w-sm text-sm',
+        'pointer-events-auto flex w-full min-w-0 items-start gap-3 rounded-lg border px-3 py-3 shadow-md',
+        'max-w-full text-sm break-words sm:min-w-64 sm:max-w-sm sm:px-4',
         TYPE_STYLES[notification.type],
       )}
     >
@@ -59,8 +61,8 @@ export function NotificationToast({
       <button
         type="button"
         onClick={() => onDismiss(notification.id)}
-        aria-label="Zamknij powiadomienie"
-        className="shrink-0 rounded p-0.5 opacity-70 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-current"
+        aria-label={t('notifications.close')}
+        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md opacity-70 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-current"
       >
         <X size={14} aria-hidden="true" />
       </button>

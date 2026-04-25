@@ -4,12 +4,9 @@ import { cn } from '@/lib/utils';
 import { Pagination } from '@/components/ui/Pagination';
 import * as logger from '@/lib/logger';
 import { useAppSelector } from '@/store';
-import { selectVisibleColumns } from '@/store/slices/tableSettingsSlice';
+import { selectGroupSettings } from '@/store/slices/tableSettingsSlice';
 import { CurrencyName } from '@/components/nbp/shared/CurrencyName';
 import type { NbpRate, NbpRateC, NbpGoldPrice, NbpTab } from '@/store/api/nbpApi';
-
-const SKELETON_ROWS = 8;
-const PAGE_SIZE = 20;
 
 export interface NbpGridProps {
   tab: NbpTab;
@@ -68,8 +65,10 @@ export function NbpGrid({
   const isGold = tab === 'gold';
   const isTableC = tab === 'C';
 
-  const visibleColumnsAB = useAppSelector(selectVisibleColumns(isTableC ? 'C' : tab === 'gold' ? 'gold' : tab));
-  const visibleAB = (col: string) => visibleColumnsAB.includes(col as never);
+  const groupSettings = useAppSelector(selectGroupSettings(tab));
+  const visibleColumns = groupSettings.visibleColumns;
+  const pageSize = groupSettings.layout.tableRowsPerPage;
+  const visibleAB = (col: string) => visibleColumns.includes(col as never);
 
   const cols = isGold ? 2 : isTableC ? 4 : 3;
   const hasData = isGold ? goldPrices.length > 0 : isTableC ? ratesC.length > 0 : rates.length > 0;
@@ -89,19 +88,15 @@ export function NbpGrid({
   const sortedGold = [...goldPrices];
 
   const totalItems = isGold ? sortedGold.length : isTableC ? sortedRatesC.length : sortedRates.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safePage = Math.min(Math.max(1, page), totalPages);
-  const offset = (safePage - 1) * PAGE_SIZE;
+  const offset = (safePage - 1) * pageSize;
 
-  const pageRates = sortedRates.slice(offset, offset + PAGE_SIZE);
-  const pageRatesC = sortedRatesC.slice(offset, offset + PAGE_SIZE);
-  const pageGold = sortedGold.slice(offset, offset + PAGE_SIZE);
+  const pageRates = sortedRates.slice(offset, offset + pageSize);
+  const pageRatesC = sortedRatesC.slice(offset, offset + pageSize);
+  const pageGold = sortedGold.slice(offset, offset + pageSize);
 
-  const visibleCols = isGold
-    ? visibleColumnsAB.length
-    : isTableC
-      ? visibleColumnsAB.length
-      : visibleColumnsAB.length;
+  const visibleCols = visibleColumns.length;
 
   if (error) {
     return (
@@ -204,7 +199,7 @@ export function NbpGrid({
           </thead>
           <tbody className="divide-y divide-border">
             {isLoading &&
-              Array.from({ length: SKELETON_ROWS }).map((_, i) => (
+              Array.from({ length: pageSize }).map((_, i) => (
                 <SkeletonRow key={i} cols={visibleCols + (isGold ? 0 : 1)} />
               ))}
 

@@ -82,6 +82,34 @@ src/
 artifacts/            gitignored — coverage/ and docs/
 ```
 
+## NBP Notes
+
+- `src/components/nbp/index.ts` is only a barrel export.
+- The reusable part of the NBP feature is the pattern, not the current NBP types:
+  - `grid` and `tiles` are still NBP-specific because they bind to `NbpRate`, `NbpRateC`, and `NbpGoldPrice`
+  - `chart` is semi-generic because the render shell is reusable, but the data mapping is NBP-specific
+  - `details` is intentionally domain-specific
+  - `shared/CurrencyName` is the closest thing to a general-purpose helper
+- `tableSettingsSlice` is the source of truth for NBP display state:
+  - visible columns
+  - chart axis presentation
+  - layout settings for table rows per page, tiles per page, and tile columns
+  - chart settings for interaction mode, legend visibility, grid visibility, and range presets
+  - persistence through `localStorage` key `nbp:tableSettings`
+- `TableSettingsModal` is the user-facing editor for those settings.
+- `NbpGrid` and `NbpTiles` read layout settings from Redux instead of hardcoding page size.
+- `NbpChart` is mobile-first and must keep hover/pinned analysis usable without relying on desktop hover alone.
+- Current control mapping:
+  - table rows per page = `tableRowsPerPage`
+  - tiles pagination size = `tileItemsPerPage`
+  - tile grid density = `tileColumns`
+  - visible table fields = `visibleColumns`
+  - chart interaction = `interactionMode`
+  - chart legend toggle = `showLegend`
+  - chart grid toggle = `showGrid`
+  - chart range preset = `rangePreset`
+- If a second data page is added later, keep `NbpPage` as the orchestrator and split only the settings/data model that is actually shared.
+
 ## Conventions
 
 - **Path alias**: `@/` maps to `src/`

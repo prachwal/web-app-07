@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -12,6 +12,10 @@ export interface BottomSheetProps {
   children: React.ReactNode;
   /** Accessible label forwarded to `aria-label` on the dialog element. */
   ariaLabel?: string;
+  /** Element that should receive focus when the sheet opens. */
+  initialFocusRef?: React.RefObject<HTMLElement | null>;
+  /** Optional id forwarded to the dialog element. */
+  id?: string;
 }
 
 /**
@@ -30,13 +34,30 @@ export interface BottomSheetProps {
  *
  * @param props - {@link BottomSheetProps}
  */
-export function BottomSheet({ open, onClose, children, ariaLabel }: BottomSheetProps): React.JSX.Element {
+export function BottomSheet({
+  open,
+  onClose,
+  children,
+  ariaLabel,
+  initialFocusRef,
+  id,
+}: BottomSheetProps): React.JSX.Element {
   const reducedMotion = useReducedMotion();
+  const panelRef = useRef<HTMLDivElement>(null);
 
   /* Escape key + focus restoration — combined into one effect for simplicity. */
   useEffect(() => {
     if (!open) return;
     const prevFocus = document.activeElement;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const focusTimer = window.setTimeout(() => {
+      if (initialFocusRef?.current) {
+        initialFocusRef.current.focus();
+      } else {
+        panelRef.current?.focus();
+      }
+    }, 0);
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
@@ -46,9 +67,11 @@ export function BottomSheet({ open, onClose, children, ariaLabel }: BottomSheetP
     document.addEventListener('keydown', handler);
     return () => {
       document.removeEventListener('keydown', handler);
+      window.clearTimeout(focusTimer);
+      document.body.style.overflow = prevOverflow;
       if (prevFocus instanceof HTMLElement) prevFocus.focus();
     };
-  }, [open, onClose]);
+  }, [initialFocusRef, open, onClose]);
 
   return (
     <AnimatePresence>
@@ -68,6 +91,8 @@ export function BottomSheet({ open, onClose, children, ariaLabel }: BottomSheetP
 
           {/* Sheet panel */}
           <motion.div
+            ref={panelRef}
+            id={id}
             key="sheet-panel"
             role="dialog"
             aria-modal="true"

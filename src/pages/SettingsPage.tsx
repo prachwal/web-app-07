@@ -5,6 +5,13 @@ import { useAppDispatch, useAppSelector } from '@/store';
 import { setTheme, type ThemeMode } from '@/store/slices/themeSlice';
 import { setLocale, type Locale } from '@/store/slices/localeSlice';
 import { addNotification } from '@/store/slices/notificationsSlice';
+import {
+  selectUiPreferences,
+  setAnimateBackdrop,
+  setAnimatePanel,
+  setCloseOnLink,
+  setCloseOnEscape,
+} from '@/store/slices/uiPreferencesSlice';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
 
@@ -30,6 +37,38 @@ export function SettingsPage(): React.JSX.Element {
   const dispatch = useAppDispatch();
   const currentTheme = useAppSelector((state) => state.theme.mode);
   const currentLocale = useAppSelector((state) => state.locale.locale);
+  const uiPreferences = useAppSelector(selectUiPreferences);
+
+  const mobileNavOptions = [
+    {
+      key: 'animateBackdrop',
+      checked: uiPreferences.animateBackdrop,
+      label: t('mobileNavigation.options.animateBackdrop.label'),
+      description: t('mobileNavigation.options.animateBackdrop.description'),
+      onChange: (checked: boolean) => dispatch(setAnimateBackdrop(checked)),
+    },
+    {
+      key: 'animatePanel',
+      checked: uiPreferences.animatePanel,
+      label: t('mobileNavigation.options.animatePanel.label'),
+      description: t('mobileNavigation.options.animatePanel.description'),
+      onChange: (checked: boolean) => dispatch(setAnimatePanel(checked)),
+    },
+    {
+      key: 'closeOnLink',
+      checked: uiPreferences.closeOnLink,
+      label: t('mobileNavigation.options.closeOnLink.label'),
+      description: t('mobileNavigation.options.closeOnLink.description'),
+      onChange: (checked: boolean) => dispatch(setCloseOnLink(checked)),
+    },
+    {
+      key: 'closeOnEscape',
+      checked: uiPreferences.closeOnEscape,
+      label: t('mobileNavigation.options.closeOnEscape.label'),
+      description: t('mobileNavigation.options.closeOnEscape.description'),
+      onChange: (checked: boolean) => dispatch(setCloseOnEscape(checked)),
+    },
+  ] as const;
 
   return (
     <PageLayout>
@@ -87,6 +126,41 @@ export function SettingsPage(): React.JSX.Element {
               >
                 {label}
               </button>
+            ))}
+          </div>
+        </section>
+
+        <section aria-labelledby="settings-mobile-navigation" className="mt-10">
+          <h2 id="settings-mobile-navigation" className="text-xl font-semibold text-foreground">
+            {t('mobileNavigation.heading')}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t('mobileNavigation.description')}</p>
+          <div className="mt-4 space-y-3">
+            {mobileNavOptions.map((option) => (
+              <div
+                key={option.key}
+                className={cn(
+                  'flex items-start gap-3 rounded-lg border border-border px-4 py-3',
+                  'bg-background transition-colors hover:bg-muted/40',
+                )}
+              >
+                <input
+                  id={`mobile-nav-${option.key}`}
+                  type="checkbox"
+                  checked={option.checked}
+                  onChange={(event) => option.onChange(event.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-border text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                />
+                <span className="min-w-0">
+                  <label
+                    htmlFor={`mobile-nav-${option.key}`}
+                    className="block cursor-pointer text-sm font-medium text-foreground"
+                  >
+                    {option.label}
+                  </label>
+                  <span className="mt-1 block text-sm text-muted-foreground">{option.description}</span>
+                </span>
+              </div>
             ))}
           </div>
         </section>

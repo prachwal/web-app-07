@@ -5,9 +5,13 @@ import { motion, useReducedMotion } from 'motion/react';
 import { Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/lib/useBreakpoint';
-import { useAppSelector } from '@/store';
-import { selectAxisPresentation } from '@/store/slices/tableSettingsSlice';
-import type { NbpTableGroup } from '@/store/slices/tableSettingsSlice';
+import { useAppDispatch, useAppSelector } from '@/store';
+import {
+  selectAxisPresentation,
+  selectGroupChartSettings,
+  setChartRangePreset,
+} from '@/store/slices/tableSettingsSlice';
+import type { NbpTableGroup, ChartRangePreset } from '@/store/slices/tableSettingsSlice';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { NbpFilters } from '@/components/nbp/filters/NbpFilters';
 import { NbpGrid } from '@/components/nbp/grid/NbpGrid';
@@ -40,6 +44,22 @@ function daysAgo(n: number): string {
 /** Returns today's date as an ISO string. */
 function today(): string {
   return new Date().toISOString().split('T')[0];
+}
+
+/** Return an ISO date string N days before today, or an absolute preset range. */
+function presetRange(preset: ChartRangePreset): { start: string; end: string } {
+  const end = today();
+  const daysMap: Record<Exclude<ChartRangePreset, 'auto'>, number> = {
+    '7d': 7,
+    '30d': 30,
+    '90d': 90,
+    '180d': 180,
+    '365d': 365,
+  };
+  if (preset === 'auto') {
+    return { start: daysAgo(30), end };
+  }
+  return { start: daysAgo(daysMap[preset]), end };
 }
 
 /** Valid NbpTab values used to sanitise the URL `tab` param. */
@@ -98,6 +118,7 @@ export function NbpPage(): React.JSX.Element {
   const reducedMotion = useReducedMotion();
   const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
+  const dispatch = useAppDispatch();
 
   /* ── URL-derived state (URL is the single source of truth for filters) ── */
   const tabParam = searchParams.get('tab');
@@ -123,6 +144,7 @@ export function NbpPage(): React.JSX.Element {
   /* ── axis presentation from Redux (follows active tab group) ── */
   const chartGroup: NbpTableGroup = tab === 'gold' ? 'gold' : tab === 'C' ? 'C' : tab;
   const chartAxisPresentation = useAppSelector(selectAxisPresentation(chartGroup));
+  const chartSettings = useAppSelector(selectGroupChartSettings(chartGroup));
 
   /* ── favorites (localStorage-persisted) ── */
   const [favorites, setFavorites] = useState<string[]>(() => lsGet<string[]>(LS_FAVORITES_KEY) ?? []);
@@ -174,6 +196,15 @@ export function NbpPage(): React.JSX.Element {
     tab !== 'gold' && viewMode === 'chart' && !isNbpRangeValid(startDate, endDate)
       ? t('series.periodError')
       : null;
+
+  useEffect(() => {
+    if (viewMode !== 'chart') return;
+    if (chartSettings.rangePreset === 'auto') return;
+    const range = presetRange(chartSettings.rangePreset);
+    if (startDate !== range.start || endDate !== range.end) {
+      updateParams({ start: range.start, end: range.end });
+    }
+  }, [chartSettings.rangePreset, viewMode, startDate, endDate, updateParams]);
 
   /* ── data queries ── */
   const tableQuery = useGetExchangeTableQuery(tab as NbpTableType, {
@@ -244,7 +275,7 @@ export function NbpPage(): React.JSX.Element {
     return searched;
   }, [tableEntry, deferredSearch, sortBy, favorites]);
 
-  const goldPrices = goldQuery.data ?? [];
+  const goldPrices = useMemo(() => goldQuery.data ?? [], [goldQuery.data]);
 
   /* ── derived data for chart ── */
   const chartData = useMemo<ChartPoint[]>(() => {
@@ -289,6 +320,7 @@ export function NbpPage(): React.JSX.Element {
   };
 
   const handleClear = () => {
+    dispatch(setChartRangePreset({ group: chartGroup, rangePreset: 'auto' }));
     updateParams({ start: daysAgo(30), end: today() });
     setSelection(null);
   };
@@ -302,14 +334,14 @@ export function NbpPage(): React.JSX.Element {
     });
   };
 
-  const handleRateCSelect = useCallback((rate: NbpRateC) => {
+  const handleRateCSelect = (rate: NbpRateC) => {
     if (!tableCEntry) return;
     setSelection({
       type: 'rateC',
       rate,
       effectiveDate: tableCEntry.effectiveDate,
     });
-  }, [tableCEntry]);
+  };
 
   const handleGoldSelect = (price: NbpGoldPrice) => {
     setSelection({ type: 'gold', goldPrice: price });
@@ -390,8 +422,14 @@ export function NbpPage(): React.JSX.Element {
               onSearchChange={setSearch}
               startDate={startDate}
               endDate={endDate}
-              onStartDateChange={(v) => updateParams({ start: v })}
-              onEndDateChange={(v) => updateParams({ end: v })}
+              onStartDateChange={(v) => {
+                dispatch(setChartRangePreset({ group: chartGroup, rangePreset: 'auto' }));
+                updateParams({ start: v });
+              }}
+              onEndDateChange={(v) => {
+                dispatch(setChartRangePreset({ group: chartGroup, rangePreset: 'auto' }));
+                updateParams({ end: v });
+              }}
               onClear={handleClear}
               isPending={isPending}
               viewMode={viewMode}
@@ -452,11 +490,18 @@ export function NbpPage(): React.JSX.Element {
           {showChart ? (
             /* Chart view */
             <NbpChart
+              key={`${tab}:${chartCode}:${startDate}:${endDate}:${chartSettings.gaplessTimeline ? 'gapless' : 'gapped'}`}
               data={chartData}
               isLoading={chartIsLoading}
               tab={tab}
               currency={chartCode}
+              rangeStart={startDate}
+              rangeEnd={endDate}
               axisPresentation={chartAxisPresentation}
+              interactionMode={chartSettings.interactionMode}
+              showLegend={chartSettings.showLegend}
+              showGrid={chartSettings.showGrid}
+              gaplessTimeline={chartSettings.gaplessTimeline}
             />
           ) : showTiles ? (
             /* Tiles (kafelki) view */
@@ -531,23 +576,16 @@ export function NbpPage(): React.JSX.Element {
                 />
               </BottomSheet>
 
-              {/* Column settings modal */}
-              <TableSettingsModal
-                open={settingsOpen}
-                onClose={() => setSettingsOpen(false)}
-                group={chartGroup}
-              />
             </>
           )}
 
-          {/* Settings modal for chart and tiles views */}
-          {(showChart || showTiles) && (
-            <TableSettingsModal
-              open={settingsOpen}
-              onClose={() => setSettingsOpen(false)}
-              group={chartGroup}
-            />
-          )}
+          <TableSettingsModal
+            key={`${chartGroup}:${viewMode}`}
+            open={settingsOpen}
+            onClose={() => setSettingsOpen(false)}
+            group={chartGroup}
+            viewMode={viewMode}
+          />
         </motion.div>
       </div>
     </PageLayout>

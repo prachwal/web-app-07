@@ -8,6 +8,28 @@
     "heading": "Language",
     "description": "Choose the display language for the application."
   },
+  "mobileNavigation": {
+    "heading": "Mobile navigation",
+    "description": "Adjust how the mobile drawer behaves and animates.",
+    "options": {
+      "animateBackdrop": {
+        "label": "Animate backdrop",
+        "description": "Fade the dimmed overlay in and out when the menu opens."
+      },
+      "animatePanel": {
+        "label": "Animate panel",
+        "description": "Slide the drawer panel in and out instead of showing it instantly."
+      },
+      "closeOnLink": {
+        "label": "Close on link tap",
+        "description": "Automatically close the drawer after opening a navigation link."
+      },
+      "closeOnEscape": {
+        "label": "Close on Escape",
+        "description": "Allow the Escape key to dismiss the drawer."
+      }
+    }
+  },
   "notifications": {
     "heading": "Notifications",
     "description": "Test the notification system.",

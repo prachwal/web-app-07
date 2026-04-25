@@ -7,6 +7,8 @@ import '@/i18n';
 import themeReducer from '@/store/slices/themeSlice';
 import localeReducer from '@/store/slices/localeSlice';
 import tableSettingsReducer from '@/store/slices/tableSettingsSlice';
+import uiPreferencesReducer from '@/store/slices/uiPreferencesSlice';
+import notificationsReducer from '@/store/slices/notificationsSlice';
 import { baseApi } from '@/store/api/baseApi';
 import { nbpApi } from '@/store/api/nbpApi';
 
@@ -16,15 +18,18 @@ import { nbpApi } from '@/store/api/nbpApi';
  *
  * @returns A fresh configured store
  */
-export function createTestStore() {
+export function createTestStore(preloadedState?: Parameters<typeof configureStore>[0]['preloadedState']) {
   return configureStore({
     reducer: {
       theme: themeReducer,
       locale: localeReducer,
       tableSettings: tableSettingsReducer,
+      uiPreferences: uiPreferencesReducer,
+      notifications: notificationsReducer,
       [baseApi.reducerPath]: baseApi.reducer,
       [nbpApi.reducerPath]: nbpApi.reducer,
     },
+    preloadedState,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat(baseApi.middleware, nbpApi.middleware),
   });

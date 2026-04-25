@@ -1,5 +1,6 @@
 {
   "nav": {
+    "menu": "Menu",
     "home": "Strona główna",
     "about": "O nas",
     "contact": "Kontakt",
@@ -28,5 +29,8 @@
     "openMenu": "Otwórz menu nawigacyjne",
     "closeMenu": "Zamknij menu nawigacyjne",
     "back": "Wróć"
+  },
+  "notifications": {
+    "close": "Zamknij powiadomienie"
   }
 }

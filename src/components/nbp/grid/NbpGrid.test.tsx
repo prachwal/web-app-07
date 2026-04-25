@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
-import { renderWithProviders } from '@/test/utils';
+import { renderWithProviders, createTestStore } from '@/test/utils';
+import { setTableRowsPerPage } from '@/store/slices/tableSettingsSlice';
 import { NbpGrid } from './NbpGrid';
 import type { NbpRate, NbpGoldPrice } from '@/store/api/nbpApi';
 
@@ -168,5 +169,28 @@ describe('NbpGrid', () => {
     const row = screen.getByText('CHF').closest('tr')!;
     fireEvent.keyDown(row, { key: 'Enter' });
     expect(baseProps.onRateSelect).toHaveBeenCalledWith(mockRates[2]);
+  });
+
+  it('uses table rows per page from settings', () => {
+    const store = createTestStore();
+    store.dispatch(setTableRowsPerPage({ group: 'A', rowsPerPage: 10 }));
+
+    renderWithProviders(
+      <NbpGrid
+        {...baseProps}
+        tab="A"
+        rates={Array.from({ length: 11 }).map((_, i) => ({
+          currency: `currency-${i}`,
+          code: `C${i}`.slice(0, 3),
+          mid: i + 1,
+        }))}
+        isLoading={false}
+        isFetching={false}
+        onPageChange={vi.fn()}
+      />,
+      { store },
+    );
+
+    expect(screen.getByRole('navigation', { name: /pagination/i })).toBeInTheDocument();
   });
 });

@@ -34,7 +34,7 @@ export function Pagination({
     <nav
       role="navigation"
       aria-label="Pagination"
-      className={cn('flex items-center justify-center gap-1', className)}
+      className={cn('flex items-center justify-center gap-1 pb-4 sm:pb-0', className)}
     >
       <button
         type="button"

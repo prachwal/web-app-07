@@ -8,6 +8,28 @@
     "heading": "Język",
     "description": "Wybierz język wyświetlania aplikacji."
   },
+  "mobileNavigation": {
+    "heading": "Nawigacja mobilna",
+    "description": "Dostosuj sposób działania i animacji mobilnego draweru.",
+    "options": {
+      "animateBackdrop": {
+        "label": "Animuj tło",
+        "description": "Wygaszaj przyciemnioną nakładkę przy otwieraniu i zamykaniu menu."
+      },
+      "animatePanel": {
+        "label": "Animuj panel",
+        "description": "Wysuwaj panel draweru zamiast pokazywać go od razu."
+      },
+      "closeOnLink": {
+        "label": "Zamykaj po linku",
+        "description": "Automatycznie zamykaj drawer po otwarciu linku nawigacyjnego."
+      },
+      "closeOnEscape": {
+        "label": "Zamykaj klawiszem Escape",
+        "description": "Pozwól zamknąć drawer klawiszem Escape."
+      }
+    }
+  },
   "notifications": {
     "heading": "Powiadomienia",
     "description": "Przetestuj system powiadomień.",

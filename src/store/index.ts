@@ -4,12 +4,13 @@ import themeReducer from './slices/themeSlice';
 import localeReducer from './slices/localeSlice';
 import notificationsReducer from './slices/notificationsSlice';
 import tableSettingsReducer from './slices/tableSettingsSlice';
+import uiPreferencesReducer from './slices/uiPreferencesSlice';
 import { baseApi } from './api/baseApi';
 import { nbpApi } from './api/nbpApi';
 
 /**
  * The application Redux store.
- * Includes theme, locale slices and the RTK Query API middleware.
+ * Includes theme, locale, UI preference slices and the RTK Query API middleware.
  */
 export const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
     locale: localeReducer,
     notifications: notificationsReducer,
     tableSettings: tableSettingsReducer,
+    uiPreferences: uiPreferencesReducer,
     [baseApi.reducerPath]: baseApi.reducer,
     [nbpApi.reducerPath]: nbpApi.reducer,
   },

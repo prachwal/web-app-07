@@ -73,41 +73,43 @@ export function NbpFilters({
   const endInputRef   = useRef<HTMLInputElement>(null);
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <div
-          role="tablist"
-          aria-label={t('title')}
-          className={cn(
-            'flex min-w-0 flex-1 gap-1 overflow-x-auto rounded-lg border border-border bg-muted/40 p-1',
-            '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
-            'transition-opacity duration-150',
-            isPending && 'opacity-70',
-          )}
-        >
-          {TABS.map(({ id, labelKey }) => (
-            <button
-              key={id}
-              role="tab"
-              aria-selected={tab === id}
-              type="button"
-              onClick={() => onTabChange(id)}
-              className={cn(
-                'whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors sm:px-4 sm:py-2',
-                tab === id
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground',
-              )}
-            >
-              {t(labelKey)}
-            </button>
-          ))}
-        </div>
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <div
+            role="tablist"
+            aria-label={t('title')}
+            title={t('filters.tabsScrollHint')}
+            className={cn(
+              'flex min-w-0 flex-1 gap-1 overflow-x-auto rounded-lg border border-border bg-muted/40 p-1',
+              '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+              'transition-opacity duration-150',
+              isPending && 'opacity-70',
+            )}
+          >
+            {TABS.map(({ id, labelKey }) => (
+              <button
+                key={id}
+                role="tab"
+                aria-selected={tab === id}
+                type="button"
+                onClick={() => onTabChange(id)}
+                className={cn(
+                  'whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors sm:px-4 sm:py-2',
+                  tab === id
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {t(labelKey)}
+              </button>
+            ))}
+          </div>
 
-        <div
-          role="group"
-          aria-label={t('series.viewMode')}
-          className="flex shrink-0 gap-1 rounded-lg border border-border bg-muted/40 p-1"
-        >
+          <div
+            role="group"
+            aria-label={t('series.viewMode')}
+            className="flex shrink-0 gap-1 rounded-lg border border-border bg-muted/40 p-1"
+          >
             <button
               type="button"
               aria-pressed={viewMode === 'grid'}
@@ -150,11 +152,18 @@ export function NbpFilters({
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground',
               )}
-            >
-              <BarChart2 size={16} aria-hidden="true" />
-            </button>
+              >
+                <BarChart2 size={16} aria-hidden="true" />
+              </button>
           </div>
         </div>
+
+        {isMobile && (
+          <p className="text-[11px] leading-none text-muted-foreground">
+            {t('filters.tabsScrollHint')}
+          </p>
+        )}
+      </div>
 
       {tab !== 'gold' && viewMode !== 'chart' && (
         <div className="flex items-center gap-2">
@@ -178,15 +187,16 @@ export function NbpFilters({
             />
           </div>
           {onSortByChange && (
-            <div className="flex shrink-0 items-center gap-1">
-              <ArrowUpDown size={14} className="text-muted-foreground" aria-hidden="true" />
+            <div className="flex h-10 shrink-0 items-center gap-2 rounded-md border border-border bg-background px-2">
+              <ArrowUpDown size={16} className="text-muted-foreground" aria-hidden="true" />
               <select
                 value={sortBy}
                 onChange={(e) => onSortByChange(e.target.value as SortField)}
                 aria-label={t('filters.sortBy')}
                 className={cn(
-                  'rounded-md border border-border bg-background py-2 pl-2 pr-6 text-sm',
-                  'text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  'h-full min-w-30 bg-transparent text-sm text-muted-foreground',
+                  'dark:scheme-dark',
+                  'focus:outline-none focus-visible:ring-0',
                 )}
               >
                 <option value="default">{t('filters.sortDefault')}</option>
