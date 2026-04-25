@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Star, BarChart2, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Pagination } from '@/components/ui/Pagination';
+import * as logger from '@/lib/logger';
 import type { NbpRate, NbpRateC, NbpGoldPrice, NbpTab } from '@/store/api/nbpApi';
 
 const PAGE_SIZE = 12;
@@ -103,7 +104,7 @@ export function NbpTiles({
     );
   }
 
-  /* ── sort: favourites first ── */
+  /* ── sort: favourites first (not applicable to gold tab) ── */
   const sortedRates = [...rates].sort((a, b) => {
     const aFav = favorites.includes(a.code) ? 0 : 1;
     const bFav = favorites.includes(b.code) ? 0 : 1;
@@ -116,11 +117,8 @@ export function NbpTiles({
     return aFav - bFav;
   });
 
-  const sortedGold = [...goldPrices].sort((a, b) => {
-    const aFav = favorites.includes(a.data) ? 0 : 1;
-    const bFav = favorites.includes(b.data) ? 0 : 1;
-    return aFav - bFav;
-  });
+  // Gold rows are time-series entries — date-based keys are not meaningful favorites
+  const sortedGold = [...goldPrices];
 
   /* ── pagination ── */
   const totalItems = isGold ? sortedGold.length : isTableC ? sortedRatesC.length : sortedRates.length;
@@ -151,6 +149,7 @@ export function NbpTiles({
 
   /* ── empty ── */
   if (totalItems === 0) {
+    logger.debug('NbpTiles: no data', { tab });
     return (
       <p className="py-16 text-center text-sm text-muted-foreground">{t('grid.noData')}</p>
     );
@@ -278,35 +277,14 @@ export function NbpTiles({
             );
           })}
 
-        {/* Gold tiles */}
+        {/* Gold tiles — no favorites (date-based entries are not fav’able) */}
         {isGold &&
           pageGold.map((entry) => {
-            const isFav = favorites.includes(entry.data);
             return (
               <div
                 key={entry.data}
-                className={cn(
-                  'group relative flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors',
-                  'hover:border-amber-400/40 hover:bg-muted/30',
-                  isFav && 'border-amber-400/60 bg-amber-50/5',
-                )}
+                className="group relative flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:border-amber-400/40 hover:bg-muted/30"
               >
-                <button
-                  type="button"
-                  aria-pressed={isFav}
-                  aria-label={isFav ? t('tiles.removeFavorite', { code: entry.data }) : t('tiles.addFavorite', { code: entry.data })}
-                  onClick={() => onToggleFavorite(entry.data)}
-                  className={cn(
-                    'absolute right-2 top-2 rounded p-0.5 transition-colors',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                    isFav
-                      ? 'text-amber-500 opacity-100'
-                      : 'text-muted-foreground opacity-0 group-hover:opacity-100',
-                  )}
-                >
-                  <Star size={13} fill={isFav ? 'currentColor' : 'none'} aria-hidden="true" />
-                </button>
-
                 <span className="font-mono text-xs text-muted-foreground">{entry.data}</span>
                 <span className="mt-1 text-lg font-bold tabular-nums text-amber-600">
                   {entry.cena.toFixed(2)}

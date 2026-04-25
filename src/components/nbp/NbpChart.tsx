@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useReducedMotion } from 'motion/react';
+import { useIsDark } from '@/lib/useTheme';
+import * as logger from '@/lib/logger';
 import {
   ResponsiveContainer,
   LineChart,
@@ -55,6 +57,13 @@ export function NbpChart({ data, isLoading, tab, currency = '' }: NbpChartProps)
   const { t } = useTranslation('nbp');
   const reducedMotion = useReducedMotion();
   const animate = !reducedMotion;
+  const isDark = useIsDark();
+
+  /* ── theme-resolved colors for SVG presentation attributes ──
+   * SVG presentation attributes (stroke, fill, etc.) do NOT support
+   * CSS custom properties, so we resolve explicit hex values here. ── */
+  const axisColor = isDark ? '#94a3b8' : '#64748b';   // slate-400 / slate-500
+  const gridColor = isDark ? '#1e293b' : '#e2e8f0';   // slate-800 / slate-200
 
   const yLabel = tab === 'gold' ? t('chart.axisGold') : t('chart.axisRate');
   const ariaLabel =
@@ -101,6 +110,7 @@ export function NbpChart({ data, isLoading, tab, currency = '' }: NbpChartProps)
 
   /* ── no data ── */
   if (data.length === 0) {
+    logger.debug('NbpChart: no data', { tab, currency });
     return (
       <div className="flex h-64 items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground">
         {t('chart.noData')}
@@ -130,24 +140,24 @@ export function NbpChart({ data, isLoading, tab, currency = '' }: NbpChartProps)
 
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={data} margin={{ top: 4, right: 24, bottom: 4, left: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
           <XAxis
             dataKey="date"
             tickFormatter={tickFormatter}
-            tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-            axisLine={{ stroke: 'hsl(var(--border))' }}
+            tick={{ fontSize: 11, fill: axisColor }}
+            axisLine={{ stroke: gridColor }}
             tickLine={false}
             label={{
               value: t('chart.axisDate'),
               position: 'insideBottom',
               offset: -2,
-              style: { fontSize: 11, fill: 'hsl(var(--muted-foreground))' },
+              style: { fontSize: 11, fill: axisColor },
             }}
           />
           <YAxis
             domain={yDomain}
-            tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-            axisLine={{ stroke: 'hsl(var(--border))' }}
+            tick={{ fontSize: 11, fill: axisColor }}
+            axisLine={{ stroke: gridColor }}
             tickLine={false}
             width={56}
             label={{
@@ -155,7 +165,7 @@ export function NbpChart({ data, isLoading, tab, currency = '' }: NbpChartProps)
               angle: -90,
               position: 'insideLeft',
               offset: 12,
-              style: { fontSize: 11, fill: 'hsl(var(--muted-foreground))' },
+              style: { fontSize: 11, fill: axisColor },
             }}
           />
           <Tooltip
@@ -168,7 +178,7 @@ export function NbpChart({ data, isLoading, tab, currency = '' }: NbpChartProps)
             }}
           />
           <Legend
-            wrapperStyle={{ fontSize: 12, color: 'hsl(var(--muted-foreground))' }}
+            wrapperStyle={{ fontSize: 12, color: axisColor }}
           />
 
           {/* Table A / B — single mid line */}

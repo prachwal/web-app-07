@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'motion/react';
-import { X } from 'lucide-react';
+import { X, BarChart2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { NbpRate, NbpGoldPrice, NbpTableEntry } from '@/store/api/nbpApi';
 
@@ -26,6 +26,8 @@ export interface NbpDetailsProps {
   selection: NbpSelection | null;
   /** Callback fired when the user closes the panel. */
   onClose: () => void;
+  /** Callback fired when the user navigates to the chart view for a rate code. */
+  onNavigateToChart?: (code: string) => void;
 }
 
 /**
@@ -36,7 +38,7 @@ export interface NbpDetailsProps {
  * @param props - {@link NbpDetailsProps}
  * @returns The detail panel element, or null when no selection exists
  */
-export function NbpDetails({ selection, onClose }: NbpDetailsProps): React.JSX.Element | null {
+export function NbpDetails({ selection, onClose, onNavigateToChart }: NbpDetailsProps): React.JSX.Element | null {
   const { t } = useTranslation('nbp');
   const reducedMotion = useReducedMotion();
 
@@ -70,24 +72,43 @@ export function NbpDetails({ selection, onClose }: NbpDetailsProps): React.JSX.E
       </div>
 
       {selection.type === 'rate' && (
-        <dl className="space-y-3 text-sm">
-          <DetailRow label={t('details.currency')} value={selection.rate.currency} />
-          <DetailRow
-            label={t('details.code')}
-            value={<span className="font-mono font-semibold">{selection.rate.code}</span>}
-          />
-          <DetailRow
-            label={t('details.mid')}
-            value={
-              <span className="font-medium tabular-nums">
-                {selection.rate.mid.toFixed(4)}{' '}
-                <span className="text-muted-foreground">{t('details.unit')}</span>
-              </span>
-            }
-          />
-          <DetailRow label={t('details.date')} value={selection.tableEntry.effectiveDate} />
-          <DetailRow label={t('details.tableNo')} value={selection.tableEntry.no} />
-        </dl>
+        <>
+          <dl className="space-y-3 text-sm">
+            <DetailRow label={t('details.currency')} value={selection.rate.currency} />
+            <DetailRow
+              label={t('details.code')}
+              value={<span className="font-mono font-semibold">{selection.rate.code}</span>}
+            />
+            <DetailRow
+              label={t('details.mid')}
+              value={
+                <span className="font-medium tabular-nums">
+                  {selection.rate.mid.toFixed(4)}{' '}
+                  <span className="text-muted-foreground">{t('details.unit')}</span>
+                </span>
+              }
+            />
+            <DetailRow label={t('details.date')} value={selection.tableEntry.effectiveDate} />
+            <DetailRow label={t('details.tableNo')} value={selection.tableEntry.no} />
+          </dl>
+
+          {/* Navigate to chart */}
+          {onNavigateToChart && (
+            <button
+              type="button"
+              onClick={() => onNavigateToChart(selection.rate.code)}
+              aria-label={t('grid.chartFor', { code: selection.rate.code })}
+              className={cn(
+                'mt-4 flex items-center gap-2 rounded-md border border-border px-3 py-1.5',
+                'text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              )}
+            >
+              <BarChart2 size={14} aria-hidden="true" />
+              {t('series.viewChart')}
+            </button>
+          )}
+        </>
       )}
 
       {selection.type === 'gold' && (

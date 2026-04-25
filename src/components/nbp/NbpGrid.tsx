@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { AlertCircle, RefreshCw, BarChart2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Pagination } from '@/components/ui/Pagination';
+import * as logger from '@/lib/logger';
 import type { NbpRate, NbpRateC, NbpGoldPrice, NbpTab } from '@/store/api/nbpApi';
 
 const SKELETON_ROWS = 8;
@@ -97,7 +98,7 @@ export function NbpGrid({
   const cols = isGold ? 2 : isTableC ? 4 : 3;
   const hasData = isGold ? goldPrices.length > 0 : isTableC ? ratesC.length > 0 : rates.length > 0;
 
-  /* ── sort: favourites first ── */
+  /* ── sort: favourites first (not applicable to gold tab) ── */
   const sortedRates = [...rates].sort((a, b) => {
     const aFav = favorites.includes(a.code) ? 0 : 1;
     const bFav = favorites.includes(b.code) ? 0 : 1;
@@ -110,11 +111,8 @@ export function NbpGrid({
     return aFav - bFav;
   });
 
-  const sortedGold = [...goldPrices].sort((a, b) => {
-    const aFav = favorites.includes(a.data) ? 0 : 1;
-    const bFav = favorites.includes(b.data) ? 0 : 1;
-    return aFav - bFav;
-  });
+  // Gold rows are time-series entries — date-based keys are not meaningful favorites
+  const sortedGold = [...goldPrices];
 
   /* ── pagination ── */
   const totalItems = isGold ? sortedGold.length : isTableC ? sortedRatesC.length : sortedRates.length;
@@ -218,7 +216,6 @@ export function NbpGrid({
             {!isLoading &&
               isGold &&
               pageGold.map((entry) => {
-                const isFav = favorites.includes(entry.data);
                 return (
                   <tr
                     key={entry.data}
@@ -234,26 +231,7 @@ export function NbpGrid({
                     )}
                   >
                     <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        {entry.data}
-                        {onToggleFavorite && (
-                          <button
-                            type="button"
-                            aria-pressed={isFav}
-                            aria-label={isFav ? t('tiles.removeFavorite', { code: entry.data }) : t('tiles.addFavorite', { code: entry.data })}
-                            onClick={(e) => { e.stopPropagation(); onToggleFavorite(entry.data); }}
-                            className={cn(
-                              'rounded p-0.5 transition-colors',
-                              'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                              isFav
-                                ? 'text-amber-500 opacity-100'
-                                : 'text-muted-foreground opacity-0 group-hover:opacity-100',
-                            )}
-                          >
-                            <Star size={11} fill={isFav ? 'currentColor' : 'none'} aria-hidden="true" />
-                          </button>
-                        )}
-                      </span>
+                      {entry.data}
                     </td>
                     <td className="px-4 py-3 text-right font-medium tabular-nums">
                       {entry.cena.toFixed(2)}
@@ -387,13 +365,16 @@ export function NbpGrid({
               })}
 
             {/* empty state */}
-            {!isLoading && !hasData && (
-              <tr>
-                <td colSpan={cols} className="px-4 py-16 text-center text-sm text-muted-foreground">
-                  {t('grid.noData')}
-                </td>
-              </tr>
-            )}
+            {!isLoading && !hasData && (() => {
+              logger.debug('NbpGrid: no data', { tab });
+              return (
+                <tr>
+                  <td colSpan={cols} className="px-4 py-16 text-center text-sm text-muted-foreground">
+                    {t('grid.noData')}
+                  </td>
+                </tr>
+              );
+            })()}
           </tbody>
         </table>
       </div>

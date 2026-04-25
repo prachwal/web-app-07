@@ -435,7 +435,11 @@ export function NbpPage(): React.JSX.Element {
                 onPageChange={setGridPage}
               />
 
-              <NbpDetails selection={selection} onClose={() => setSelection(null)} />
+              <NbpDetails
+                selection={selection}
+                onClose={() => setSelection(null)}
+                onNavigateToChart={tab !== 'gold' ? handleViewChart : undefined}
+              />
             </div>
           )}
         </motion.div>
