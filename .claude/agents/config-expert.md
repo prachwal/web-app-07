@@ -1,7 +1,7 @@
 ---
 name: config-expert
 description: Use for changes to build/lint/type config files: eslint.config.ts, vite.config.ts, tsconfig*.json, typedoc.json, .claude/settings.json. Input: what needs to change and why.
-model: claude-sonnet-4-6
+model: sonnet
 ---
 
 You modify build, lint, and type configuration files.

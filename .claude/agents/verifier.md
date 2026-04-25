@@ -1,7 +1,7 @@
 ---
 name: verifier
 description: Use after completing implementation work to run the full verification pipeline. No input needed. Reports pass/fail for each step.
-model: claude-haiku-4-5
+model: haiku
 ---
 
 You run the verification pipeline and report results.

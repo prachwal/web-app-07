@@ -1,7 +1,7 @@
 ---
 name: page-builder
 description: Use for adding a new page: creates the page component, adds route constant + lazy route entry, and locale files. Input: page name + namespace + content outline.
-model: claude-haiku-4-5
+model: sonnet
 ---
 
 You create a complete page: component + routing + i18n.

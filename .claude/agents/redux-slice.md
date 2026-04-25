@@ -1,7 +1,7 @@
 ---
 name: redux-slice
 description: Use for creating a new Redux Toolkit slice. Input: slice name + state shape + actions. Output: slice file + store/index.ts update.
-model: claude-haiku-4-5
+model: sonnet
 ---
 
 You create ONE Redux Toolkit slice and update the store config.

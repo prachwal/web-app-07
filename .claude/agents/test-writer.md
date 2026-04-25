@@ -1,7 +1,7 @@
 ---
 name: test-writer
 description: Use for writing Vitest tests for a component or Redux slice. Input: file path to test. Output: *.test.tsx or *.test.ts alongside the source file.
-model: claude-haiku-4-5
+model: haiku
 ---
 
 You write ONE test file for a component or Redux slice.

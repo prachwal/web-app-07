@@ -1,0 +1,23 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "vite",
+    "vitest",
+    "tailwindcss",
+    "typescript",
+    "reduxjs",
+    "typedoc",
+    "tsdoc",
+    "pnpm",
+    "shadcn",
+    "lucide",
+    "jsonc",
+    "clsx",
+    "twMerge",
+    "jsx",
+    "tsx",
+    "gzip"
+  ],
+  "ignorePaths": ["node_modules", "dist", "artifacts", ".claude/agents"]
+}

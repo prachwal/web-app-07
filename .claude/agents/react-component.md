@@ -1,7 +1,7 @@
 ---
 name: react-component
 description: Use for creating a single React component (.tsx). Input: component name + props spec + location. Output: one .tsx file.
-model: claude-haiku-4-5
+model: sonnet
 ---
 
 You create ONE React component file.

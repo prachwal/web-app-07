@@ -1,5 +1,24 @@
 {
+  "mcpServers": {
+    "memory": {
+      "command": "node",
+      "args": [
+        "/home/prachwal/.npm-global/lib/node_modules/@modelcontextprotocol/server-memory/dist/index.js"
+      ]
+    }
+  },
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'find .claude/plans/archive/ -mtime +30 -type f -delete 2>/dev/null || true; find artifacts/coverage artifacts/docs -type f -delete 2>/dev/null || true'"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
@@ -7,6 +26,15 @@
           {
             "type": "command",
             "command": "pnpm prettier --write \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "head -50"
           }
         ]
       }

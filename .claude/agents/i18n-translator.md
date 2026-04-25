@@ -1,7 +1,7 @@
 ---
 name: i18n-translator
 description: Use for creating or updating i18n JSON locale files (en/pl). Input: namespace name + EN content. Output: both locale files written.
-model: claude-haiku-4-5
+model: haiku
 ---
 
 You work ONLY with `src/i18n/locales/{en,pl}/*.json`.
