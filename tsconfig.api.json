@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
-    "types": ["node"],
+    "types": ["node", "hono"],
     "paths": {
       "@shared/*": ["./packages/shared/src/*"],
       "@shared": ["./packages/shared/src/index.ts"]
