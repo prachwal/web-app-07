@@ -217,7 +217,7 @@ export function NbpFilters({
 
       {/* ── Chart controls — currency code + date range for A / B / C ── */}
       {tab !== 'gold' && viewMode === 'chart' && (
-        <div className="flex flex-wrap items-end gap-3">
+        <div className="flex flex-wrap items-start gap-3">
           {/* Currency code input */}
           <div className="flex flex-col gap-1">
             {!compactLabels && (
@@ -356,8 +356,8 @@ export function NbpFilters({
               aria-label={t('filters.clear')}
               onClick={onClear}
               className={cn(
-                'rounded-md border border-border p-2 text-muted-foreground transition-colors',
-                'hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                'rounded-md border border-destructive/50 p-2 text-destructive transition-colors',
+                'hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               )}
             >
               <X size={16} aria-hidden="true" />
@@ -367,8 +367,8 @@ export function NbpFilters({
               type="button"
               onClick={onClear}
               className={cn(
-                'flex items-center gap-2 rounded-md border border-border px-3 py-2',
-                'text-sm text-muted-foreground transition-colors hover:text-foreground',
+                'flex items-center gap-2 rounded-md border border-destructive/50 px-3 py-2',
+                'text-sm text-destructive transition-colors hover:bg-destructive/10',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               )}
             >

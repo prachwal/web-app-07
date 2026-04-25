@@ -6,6 +6,7 @@ import { type PropsWithChildren } from 'react';
 import '@/i18n';
 import themeReducer from '@/store/slices/themeSlice';
 import localeReducer from '@/store/slices/localeSlice';
+import tableSettingsReducer from '@/store/slices/tableSettingsSlice';
 import { baseApi } from '@/store/api/baseApi';
 import { nbpApi } from '@/store/api/nbpApi';
 
@@ -20,6 +21,7 @@ export function createTestStore() {
     reducer: {
       theme: themeReducer,
       locale: localeReducer,
+      tableSettings: tableSettingsReducer,
       [baseApi.reducerPath]: baseApi.reducer,
       [nbpApi.reducerPath]: nbpApi.reducer,
     },

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import themeReducer from './slices/themeSlice';
 import localeReducer from './slices/localeSlice';
 import notificationsReducer from './slices/notificationsSlice';
+import tableSettingsReducer from './slices/tableSettingsSlice';
 import { baseApi } from './api/baseApi';
 import { nbpApi } from './api/nbpApi';
 
@@ -15,6 +16,7 @@ export const store = configureStore({
     theme: themeReducer,
     locale: localeReducer,
     notifications: notificationsReducer,
+    tableSettings: tableSettingsReducer,
     [baseApi.reducerPath]: baseApi.reducer,
     [nbpApi.reducerPath]: nbpApi.reducer,
   },

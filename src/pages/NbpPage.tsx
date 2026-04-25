@@ -10,6 +10,7 @@ import { NbpGrid } from '@/components/nbp/NbpGrid';
 import { NbpTiles } from '@/components/nbp/NbpTiles';
 import { NbpChart, type ChartPoint } from '@/components/nbp/NbpChart';
 import { NbpDetails, type NbpSelection } from '@/components/nbp/NbpDetails';
+import { TableSettingsModal } from '@/components/nbp/TableSettingsModal';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import {
   useGetExchangeTableQuery,
@@ -109,6 +110,7 @@ export function NbpPage(): React.JSX.Element {
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [selection, setSelection] = useState<NbpSelection | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   /* ── favorites (localStorage-persisted) ── */
   const [favorites, setFavorites] = useState<string[]>(() => lsGet<string[]>(LS_FAVORITES_KEY) ?? []);
@@ -372,19 +374,25 @@ export function NbpPage(): React.JSX.Element {
           <div className="mb-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs sm:mb-5 sm:px-4 sm:text-sm">
             <span className="font-medium text-foreground">{t(`tableDesc.${tab}`)}</span>
             {activeEntry && (
-              <span className="ml-1 text-muted-foreground sm:ml-2">
-                {'· '}
-                {t('tableDesc.info', {
-                  count: activeEntry.rates.length,
-                  date: activeEntry.effectiveDate,
-                })}
-              </span>
+              <>
+                <br className="sm:hidden" />
+                <span className="text-muted-foreground sm:ml-2">
+                  <span className="hidden sm:inline">{'· '}</span>
+                  {t('tableDesc.info', {
+                    count: activeEntry.rates.length,
+                    date: activeEntry.effectiveDate,
+                  })}
+                </span>
+              </>
             )}
             {tab === 'gold' && (
-              <span className="ml-1 text-muted-foreground sm:ml-2">
-                {'· '}
-                {t('tableDesc.goldInfo', { start: startDate, end: endDate })}
-              </span>
+              <>
+                <br className="sm:hidden" />
+                <span className="text-muted-foreground sm:ml-2">
+                  <span className="hidden sm:inline">{'· '}</span>
+                  {t('tableDesc.goldInfo', { start: startDate, end: endDate })}
+                </span>
+              </>
             )}
           </div>
 
@@ -441,6 +449,7 @@ export function NbpPage(): React.JSX.Element {
                   onToggleFavorite={toggleFavorite}
                   page={gridPage}
                   onPageChange={setGridPage}
+                  onOpenSettings={() => setSettingsOpen(true)}
                 />
 
                 {/* Desktop inline details panel — hidden on mobile (uses BottomSheet instead) */}
@@ -465,6 +474,13 @@ export function NbpPage(): React.JSX.Element {
                   onNavigateToChart={tab !== 'gold' ? handleViewChart : undefined}
                 />
               </BottomSheet>
+
+              {/* Column settings modal */}
+              <TableSettingsModal
+                open={settingsOpen}
+                onClose={() => setSettingsOpen(false)}
+                group={tab === 'gold' ? 'gold' : tab === 'C' ? 'C' : tab}
+              />
             </>
           )}
         </motion.div>

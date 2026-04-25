@@ -25,7 +25,8 @@
     "no": "Table no.",
     "noData": "No data for the selected filters.",
     "loading": "Loading data…",
-    "chartFor": "Show chart for {{code}}"
+    "chartFor": "Show chart for {{code}}",
+    "settings": "Column settings"
   },
   "details": {
     "heading": "Details",
@@ -62,7 +63,9 @@
     "axisGold": "Price (PLN/g)",
     "mid": "Mid rate",
     "bid": "Buy rate",
-    "ask": "Sell rate"
+    "ask": "Sell rate",
+    "rangeDate": "{{from}} – {{to}}",
+    "rangeValue": "Min {{min}} / Max {{max}} PLN"
   },
   "tableDesc": {
     "A": "Average exchange rates — major currencies",
@@ -75,5 +78,14 @@
   "errors": {
     "fetch": "Failed to load data. Please try again.",
     "retry": "Retry"
+  },
+  "settings": {
+    "columns": "Visible columns",
+    "axisMode": "Chart axis",
+    "axisLabels": "Show axis labels",
+    "axisTooltip": "Hover tooltip only",
+    "axisCombined": "Summary below chart",
+    "required": "required",
+    "reset": "Reset to defaults"
   }
 }

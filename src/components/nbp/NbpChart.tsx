@@ -22,6 +22,7 @@ import {
 } from 'recharts';
 import { cn } from '@/lib/utils';
 import type { NbpTab } from '@/store/api/nbpApi';
+import type { AxisPresentation } from '@/store/slices/tableSettingsSlice';
 
 /** A single data point in the chart. */
 export interface ChartPoint {
@@ -49,6 +50,13 @@ export interface NbpChartProps {
   currency?: string;
   /** Controls horizontal alignment of the chart title. Defaults to `'left'`. */
   titleAlign?: 'left' | 'center' | 'right';
+  /**
+   * Axis presentation mode.
+   * - `'labels'` (default): X and Y axis ticks + HTML axis labels shown.
+   * - `'tooltip'`: axis ticks hidden; data visible only via hover tooltip.
+   * - `'combined'`: axis ticks hidden; a summary box with value range is shown below the chart.
+   */
+  axisPresentation?: AxisPresentation;
 }
 
 /**
@@ -62,7 +70,7 @@ export interface NbpChartProps {
  * @param props - {@link NbpChartProps}
  * @returns The chart element or a loading/empty state
  */
-export function NbpChart({ data, isLoading, tab, currency = '', titleAlign }: NbpChartProps): React.JSX.Element {
+export function NbpChart({ data, isLoading, tab, currency = '', titleAlign, axisPresentation = 'labels' }: NbpChartProps): React.JSX.Element {
   const { t } = useTranslation('nbp');
   const reducedMotion = useReducedMotion();
   const animate = !reducedMotion;
@@ -83,6 +91,10 @@ export function NbpChart({ data, isLoading, tab, currency = '', titleAlign }: Nb
   const COLOR_GOLD = CHART_COLOR_GOLD_LINE;
 
   const yLabel = tab === 'gold' ? t('chart.axisGold') : t('chart.axisRate');
+  const showAxisLabels = axisPresentation === 'labels';
+  const showTooltipOnly = axisPresentation === 'tooltip';
+  const showCombined = axisPresentation === 'combined';
+  void showTooltipOnly; // used implicitly via !showAxisLabels
   const ariaLabel =
     tab === 'gold'
       ? `${t('chart.heading')} — ${t('chart.axisGold')}`
@@ -153,14 +165,16 @@ export function NbpChart({ data, isLoading, tab, currency = '', titleAlign }: Nb
 
       {/* Y-axis title rendered in HTML to avoid SVG coordinate-system positioning issues */}
       <div className="flex items-stretch gap-1">
-        <div className="flex shrink-0 items-center justify-center" style={{ width: 14 }}>
-          <span
-            className="whitespace-nowrap text-[10px] text-muted-foreground"
-            style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
-          >
-            {yLabel}
-          </span>
-        </div>
+        {showAxisLabels && (
+          <div className="flex shrink-0 items-center justify-center" style={{ width: 14 }}>
+            <span
+              className="whitespace-nowrap text-[10px] text-muted-foreground"
+              style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+            >
+              {yLabel}
+            </span>
+          </div>
+        )}
 
         <div className="min-w-0 flex-1">
           <div className="h-56 w-full sm:h-72" style={{ minWidth: 0, minHeight: 0 }}>
@@ -170,17 +184,17 @@ export function NbpChart({ data, isLoading, tab, currency = '', titleAlign }: Nb
                 <XAxis
                   dataKey="date"
                   tickFormatter={dateTickFormatter}
-                  tick={{ fontSize: 10, fill: axisColor }}
+                  tick={showAxisLabels ? { fontSize: 10, fill: axisColor } : false}
                   axisLine={{ stroke: gridColor }}
                   tickLine={false}
                 />
                 <YAxis
                   domain={yDomain}
                   tickFormatter={formatAxisNumber}
-                  tick={{ fontSize: 10, fill: axisColor }}
+                  tick={showAxisLabels ? { fontSize: 10, fill: axisColor } : false}
                   axisLine={{ stroke: gridColor }}
                   tickLine={false}
-                  width={44}
+                  width={showAxisLabels ? 44 : 0}
                 />
                 <Tooltip
                   contentStyle={{
@@ -246,7 +260,7 @@ export function NbpChart({ data, isLoading, tab, currency = '', titleAlign }: Nb
           </div>
 
           {/* HTML legend — below chart, offset by YAxis width to align with plot area */}
-          <div className="ml-[44px] mt-1 flex flex-wrap gap-x-4 gap-y-0.5" aria-hidden="true">
+          <div className={cn('mt-1 flex flex-wrap gap-x-4 gap-y-0.5', showAxisLabels ? 'ml-[44px]' : 'ml-0')} aria-hidden="true">
             {(tab === 'A' || tab === 'B') && (
               <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                 <span className="inline-block h-2 w-4 rounded-sm" style={{ background: COLOR_MID }} />
@@ -274,9 +288,29 @@ export function NbpChart({ data, isLoading, tab, currency = '', titleAlign }: Nb
           </div>
 
           {/* X-axis date label */}
-          <p className="ml-[44px] mt-0.5 text-center text-[10px] text-muted-foreground">
-            {t('chart.axisDate')}
-          </p>
+          {showAxisLabels && (
+            <p className={cn('mt-0.5 text-center text-[10px] text-muted-foreground', showAxisLabels ? 'ml-[44px]' : 'ml-0')}>
+              {t('chart.axisDate')}
+            </p>
+          )}
+
+          {/* Combined: summary box with value range */}
+          {showCombined && data.length > 0 && (() => {
+            const firstDate = data[0]?.date?.slice(5) ?? '';
+            const lastDate = data[data.length - 1]?.date?.slice(5) ?? '';
+            const allValues: number[] = [];
+            if (tab === 'A' || tab === 'B') data.forEach((d) => d.mid != null && allValues.push(d.mid));
+            else if (tab === 'C') data.forEach((d) => { if (d.bid != null) allValues.push(d.bid); if (d.ask != null) allValues.push(d.ask); });
+            else data.forEach((d) => d.cena != null && allValues.push(d.cena));
+            const minVal = allValues.length ? Math.min(...allValues) : 0;
+            const maxVal = allValues.length ? Math.max(...allValues) : 0;
+            return (
+              <div className="mt-2 rounded-md border border-border/50 bg-muted/30 px-3 py-1.5 text-[11px] text-muted-foreground">
+                <span className="mr-4">{t('chart.rangeDate', { from: firstDate, to: lastDate })}</span>
+                <span>{t('chart.rangeValue', { min: formatAxisNumber(minVal), max: formatAxisNumber(maxVal) })}</span>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

@@ -25,7 +25,8 @@
     "no": "Nr tabeli",
     "noData": "Brak danych dla wybranych filtrów.",
     "loading": "Ładowanie danych…",
-    "chartFor": "Pokaż wykres dla {{code}}"
+    "chartFor": "Pokaż wykres dla {{code}}",
+    "settings": "Ustawienia kolumn"
   },
   "details": {
     "heading": "Szczegóły",
@@ -62,7 +63,9 @@
     "axisGold": "Cena (PLN/g)",
     "mid": "Kurs średni",
     "bid": "Kurs kupna",
-    "ask": "Kurs sprzedaży"
+    "ask": "Kurs sprzedaży",
+    "rangeDate": "{{from}} – {{to}}",
+    "rangeValue": "Min {{min}} / Max {{max}} PLN"
   },
   "tableDesc": {
     "A": "Kursy średnich walut — główne waluty",
@@ -75,5 +78,14 @@
   "errors": {
     "fetch": "Nie udało się załadować danych. Spróbuj ponownie.",
     "retry": "Spróbuj ponownie"
+  },
+  "settings": {
+    "columns": "Widoczne kolumny",
+    "axisMode": "Oś wykresu",
+    "axisLabels": "Pokazuj etykiety osi",
+    "axisTooltip": "Tylko tooltip (hover)",
+    "axisCombined": "Podsumowanie pod wykresem",
+    "required": "wymagana",
+    "reset": "Przywróć domyślne"
   }
 }
