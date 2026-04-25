@@ -1,0 +1,29 @@
+{
+  "servers": {
+    "memory": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/home/prachwal/.npm-global/lib/node_modules/@modelcontextprotocol/server-memory/dist/index.js"
+      ]
+    },
+    "filesystem": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/home/prachwal/.npm-global/lib/node_modules/@modelcontextprotocol/server-filesystem/dist/index.js",
+        "/home/prachwal/src/web/web-app-07"
+      ]
+    },
+    "github": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/home/prachwal/.npm-global/lib/node_modules/@modelcontextprotocol/server-github/dist/index.js"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    }
+  }
+}

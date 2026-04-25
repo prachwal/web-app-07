@@ -1,4 +1,4 @@
-Perform a fast session initialization for this project. Do all steps silently — output only the final status table.
+# Perform a fast session initialization for this project. Do all steps silently — output only the final status table
 
 ## Steps
 

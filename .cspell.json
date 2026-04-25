@@ -19,5 +19,5 @@
     "tsx",
     "gzip"
   ],
-  "ignorePaths": ["node_modules", "dist", "artifacts", ".claude/agents"]
+  "ignorePaths": ["node_modules", "dist", "artifacts", ".claude/agents", ".github/*"]
 }

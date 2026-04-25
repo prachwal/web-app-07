@@ -8,7 +8,16 @@ import vitestPlugin from '@vitest/eslint-plugin';
 export default tseslint.config(
   // Global ignores
   {
-    ignores: ['artifacts/**', 'dist/**', 'node_modules/**', '.tsbuild/**', '*.config.js'],
+    ignores: [
+      'artifacts/**',
+      'dist/**',
+      'node_modules/**',
+      '.tsbuild/**',
+      '*.config.js',
+      '.github/**',
+      '.vscode/**',
+      'artifacts/**',
+    ],
   },
 
   // TypeScript base — type-aware rules for src/
@@ -16,15 +25,15 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
-        project: './tsconfig.json',
+        projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },
   },
 
   // React plugin — use flat.recommended for ESLint 10 compatibility
-  reactPlugin.configs.flat!.recommended,
-  reactPlugin.configs.flat!['jsx-runtime'],
+  reactPlugin.configs.flat.recommended,
+  reactPlugin.configs.flat['jsx-runtime'],
   {
     rules: {
       'react/react-in-jsx-scope': 'off',

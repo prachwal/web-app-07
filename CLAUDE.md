@@ -43,9 +43,20 @@ pnpm typecheck        # tsc --noEmit
 pnpm docs             # typedoc → artifacts/docs/
 ```
 
+## MCP tools available
+
+This repository is configured for use with an MCP assistant. The assistant has access to:
+
+- file system tools for reading and editing repository files
+- terminal/command execution for shell tasks
+- git/repository inspection tools
+- browser/webpage interaction tools
+- memory storage for session and repository notes
+- task management utilities for planning and progress tracking
+
 ## Architecture
 
-```
+```text
 src/
   components/
     hero/       HeroSection, HeroHeading, HeroActions
@@ -81,6 +92,14 @@ artifacts/            gitignored — coverage/ and docs/
 - **Motion**: wrap animated elements with `useReducedMotion()` guard
 - **TypeDoc**: all exported functions/components require TSDoc comments (enforced by eslint-plugin-tsdoc)
 - **Artifacts**: `/artifacts/` is gitignored — coverage reports and TypeDoc output live here
+
+## Markdown guidance
+
+- For `*.md` files, preserve blank lines around fenced code blocks.
+- Specify a language for fenced code blocks whenever possible (` ```ts`, ` ```bash`, etc.).
+- Prefer markdown linting or formatting when available, especially on docs and repo guidance files.
+- If the repo does not provide a dedicated markdown lint script, apply standard Markdown style rules manually.
+- Keep Markdown sections clear and avoid unnecessary inline HTML.
 
 ## Subagent model
 

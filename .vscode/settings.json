@@ -1,0 +1,34 @@
+{
+    "chat.mcp.serverSampling": {
+        "web-app-07/.vscode/mcp.json: memory": {
+            "allowedModels": [
+                "copilot/auto",
+                "copilotcli/claude-sonnet-4.6",
+                "copilotcli/gpt-5-mini",
+                "copilot/oswe-vscode-prime",
+                "copilot/gpt-5-mini",
+                "copilotcli/gpt-5.4-mini"
+            ]
+        },
+        "web-app-07/.vscode/mcp.json: filesystem": {
+            "allowedModels": [
+                "copilot/auto",
+                "copilotcli/claude-sonnet-4.6",
+                "copilot/gpt-5-mini",
+                "copilotcli/gpt-5-mini",
+                "copilotcli/gpt-5.4-mini",
+                "copilot/oswe-vscode-prime"
+            ]
+        },
+        "web-app-07/.vscode/mcp.json: github": {
+            "allowedModels": [
+                "copilot/auto",
+                "copilotcli/claude-sonnet-4.6",
+                "copilot/gpt-5-mini",
+                "copilotcli/gpt-5-mini",
+                "copilotcli/gpt-5.4-mini",
+                "copilot/oswe-vscode-prime"
+            ]
+        }
+    }
+}
