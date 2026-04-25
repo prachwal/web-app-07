@@ -32,5 +32,16 @@
   },
   "notifications": {
     "close": "Zamknij powiadomienie"
+  },
+  "apiStatus": {
+    "sectionTitle": "Status API",
+    "sectionLabel": "Karty statusu API",
+    "helloTitle": "Powitanie API",
+    "helloLabel": "Karta powitania API",
+    "healthTitle": "Stan serwera",
+    "healthLabel": "Karta stanu serwera",
+    "generatedAt": "Wygenerowano o",
+    "errorFetch": "Nie udało się załadować danych.",
+    "retry": "Spróbuj ponownie"
   }
 }

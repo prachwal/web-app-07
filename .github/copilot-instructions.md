@@ -20,12 +20,15 @@ React 19 + TypeScript 6 + Vite 8 + Tailwind 4 SPA. Package manager: **pnpm** (ne
 | Tests      | vitest + @vitest/coverage-v8 + @testing-library/react | 4.x |
 | Docs       | typedoc + typedoc-plugin-markdown            | 0.28.x    |
 | Lint       | eslint 10 + typescript-eslint 8 + jsx-a11y + tsdoc | — |
+| API router | hono                                         | 4.x       |
+| API deploy | @vercel/node                                  | 5.x       |
 
 ## Commands
 
 ```bash
 pnpm dev              # dev server (localhost:5173)
 pnpm build            # tsc --noEmit && vite build
+pnpm preview          # preview production build
 pnpm test             # vitest watch
 pnpm test:coverage    # vitest run --coverage → artifacts/coverage/
 pnpm lint             # eslint .
@@ -44,26 +47,65 @@ pnpm docs             # typedoc → artifacts/docs/
 ## Architecture
 
 ```
+api/                  Vercel serverless functions (Hono router)
+  index.ts            entry — export const config + export const fetch
+  _lib/
+    logger.ts         dev=console / prod=noop logger
+    utils.ts          createEnvelope / createErrorEnvelope helpers
+  handlers/
+    hello.ts          GET /api/hello → ApiResponse<HelloPayload>
+    health.ts         GET /api/health → ApiResponse<HealthPayload>
+    contact.ts        POST /api/contact → ContactResponse
+  types/
+    api.ts            ApiResponse<T>, HelloPayload, HealthPayload, HealthStat
+packages/
+  shared/             shared types (ContactRequest, ContactResponse)
 src/
   components/
-    hero/       HeroSection, HeroHeading, HeroActions
-    layout/     Header, Footer, SkipLink
-    ui/         shadcn/ui copied components
+    api-status/       ApiStatusCards — live data from /api/hello + /api/health
+    contact/          ContactForm, ContactFormField, ContactInfo, contactSchema
+    hero/             HeroSection (accepts children), HeroHeading, HeroActions
+    layout/           Header, Footer, SkipLink, PageLayout, PageLoader, PageMotion
+    nbp/              NBP exchange rates feature (grid, tiles, chart, details, filters)
+    notifications/    NotificationContainer, NotificationToast
+    ui/               shadcn/ui copied components
   i18n/
-    locales/{en,pl}/  common.json, hero.json
+    locales/{en,pl}/  common.json, hero.json, about.json, contact.json, settings.json, nbp.json
   lib/
-    utils.ts    cn() helper (clsx + twMerge)
-  pages/        HomePage, NotFoundPage
-  providers/    ThemeProvider, I18nProvider
-  routes/       createBrowserRouter, typed route constants
+    utils.ts          cn() helper (clsx + twMerge)
+    format.ts         number / date formatting helpers
+    chartColors.ts    chart palette
+    dateUtils.ts      date range helpers
+    storage.ts        typed localStorage wrapper
+    useBreakpoint.ts  responsive breakpoint hook
+    useDocumentTitle.ts
+    useFavoriteSorter.ts
+    usePagination.ts
+    useTheme.ts
+  pages/
+    HomePage          HeroSection + ApiStatusCards
+    AboutPage
+    ContactPage
+    NbpPage           NBP exchange rate dashboard
+    SettingsPage
+    ErrorPage
+    NotFoundPage
+  providers/          ThemeProvider, I18nProvider
+  routes/             createBrowserRouter, typed route constants
+  services/
+    contact/          contactService — calls POST /api/contact
   store/
-    slices/     themeSlice ('light'|'dark'|'system'), localeSlice ('en'|'pl')
-    api/        baseApi.ts (RTK Query)
+    slices/           themeSlice, localeSlice, notificationsSlice,
+                      tableSettingsSlice, uiPreferencesSlice
+    api/
+      baseApi.ts      RTK Query base (reducerPath: 'api', baseUrl: '/api')
+      appApi.ts       useGetHelloQuery, useGetHealthQuery
+      nbpApi.ts       NBP public API endpoints
   styles/
-    globals.css Tailwind 4 + design tokens (oklch CSS vars)
+    globals.css       Tailwind 4 + design tokens (oklch CSS vars)
   test/
-    setup.ts    @testing-library/jest-dom
-    utils.tsx   custom render (Redux + Router + i18n)
+    setup.ts          @testing-library/jest-dom
+    utils.tsx         custom render (Redux + Router + i18n)
   App.tsx
   main.tsx
 artifacts/            gitignored — coverage/ and docs/
@@ -81,6 +123,15 @@ artifacts/            gitignored — coverage/ and docs/
 - **Artifacts**: `/artifacts/` is gitignored — coverage reports and TypeDoc output live here
 - **No default exports** from component files; use named exports only
 - **Never edit** `pnpm-lock.yaml` or files under `artifacts/` directly
+
+## API layer
+
+- All `/api/*` routes are handled by `api/index.ts` (Hono app) via `vercel.json` rewrite.
+- Handler export pattern: `export const config = { runtime: 'nodejs' }` + `export const fetch = (req) => app.fetch(req)`.
+- Response envelope: `ApiResponse<T>` — `{ status: bool, payload: T, error?, metadata? }`. Use `createEnvelope` / `createErrorEnvelope` from `api/_lib/utils.ts`.
+- Logger: `getLogger()` from `api/_lib/logger.ts` — console in dev, noop in prod.
+- Shared types between API and frontend live in `packages/shared/`.
+- App-specific RTK Query hooks: `useGetHelloQuery`, `useGetHealthQuery` from `src/store/api/appApi.ts`.
 
 ## Planning
 - For new features, create a `plan.md` with a detailed implementation plan before writing code.

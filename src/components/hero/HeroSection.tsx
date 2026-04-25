@@ -7,13 +7,19 @@ import { Layers, ShieldCheck, Palette } from 'lucide-react';
 
 const featureIcons = [Layers, ShieldCheck, Palette];
 
+export interface HeroSectionProps {
+  /** Optional content rendered below the feature cards, inside the same container. */
+  children?: React.ReactNode;
+}
+
 /**
  * Hero section component with ARIA landmarks, animated content, and feature cards.
  * Meets WCAG AA contrast requirements using CSS custom property color tokens.
  *
+ * @param props - {@link HeroSectionProps}
  * @returns The hero section element
  */
-export function HeroSection(): React.JSX.Element {
+export function HeroSection({ children }: HeroSectionProps = {}): React.JSX.Element {
   const { t } = useTranslation('hero');
   const shouldReduce = useReducedMotion();
 
@@ -86,6 +92,8 @@ export function HeroSection(): React.JSX.Element {
             );
           })}
         </div>
+
+        {children && <div className="mt-4">{children}</div>}
       </div>
     </section>
   );

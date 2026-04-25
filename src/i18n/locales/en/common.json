@@ -32,5 +32,16 @@
   },
   "notifications": {
     "close": "Close notification"
+  },
+  "apiStatus": {
+    "sectionTitle": "API Status",
+    "sectionLabel": "API status cards",
+    "helloTitle": "API Greeting",
+    "helloLabel": "API greeting card",
+    "healthTitle": "Server Health",
+    "healthLabel": "Server health card",
+    "generatedAt": "Generated at",
+    "errorFetch": "Failed to load data.",
+    "retry": "Try again"
   }
 }
