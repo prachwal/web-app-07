@@ -1,6 +1,8 @@
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, X, BarChart2, TableProperties, LayoutGrid } from 'lucide-react';
+import { Search, X, BarChart2, TableProperties, LayoutGrid, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/lib/useBreakpoint';
 import type { NbpTab } from '@/store/api/nbpApi';
 
 const TABS: { id: NbpTab; labelKey: string }[] = [
@@ -9,6 +11,18 @@ const TABS: { id: NbpTab; labelKey: string }[] = [
   { id: 'C', labelKey: 'tabs.tableC' },
   { id: 'gold', labelKey: 'tabs.gold' },
 ];
+
+/** Options to enable compact rendering of individual filter controls. */
+export interface CompactOptions {
+  /** Shrink the currency code input (`w-16` instead of `w-24`). */
+  currency?: boolean;
+  /** Show a calendar-icon button instead of a full date input. */
+  date?: boolean;
+  /** Show an icon-only reset button instead of a text button. */
+  reset?: boolean;
+  /** Hide field labels above inputs. */
+  labels?: boolean;
+}
 
 /** Props for the {@link NbpFilters} component. */
 export interface NbpFiltersProps {
@@ -47,6 +61,11 @@ export interface NbpFiltersProps {
    * When provided, renders a datalist autocomplete on the currency input.
    */
   availableCodes?: string[];
+  /**
+   * Options to enable compact rendering for individual filter controls.
+   * When not provided, compact mode auto-enables on mobile viewports.
+   */
+  compact?: CompactOptions;
 }
 
 /**
@@ -76,8 +95,16 @@ export function NbpFilters({
   onChartCodeChange,
   chartDateError,
   availableCodes = [],
+  compact,
 }: NbpFiltersProps): React.JSX.Element {
   const { t } = useTranslation('nbp');
+  const isMobile = useIsMobile();
+  const compactDate     = compact?.date     ?? isMobile;
+  const compactReset    = compact?.reset    ?? isMobile;
+  const compactCurrency = compact?.currency ?? isMobile;
+  const compactLabels   = compact?.labels   ?? isMobile;
+  const startInputRef = useRef<HTMLInputElement>(null);
+  const endInputRef   = useRef<HTMLInputElement>(null);
   return (
     <div className="flex flex-col gap-4">
       {/* ── Tab selector ── */}
@@ -193,10 +220,12 @@ export function NbpFilters({
       {tab !== 'gold' && viewMode === 'chart' && (
         <div className="flex flex-wrap items-end gap-3">
           {/* Currency code input */}
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">
-              {t('series.selectCurrency')}
-            </span>
+          <div className="flex flex-col gap-1">
+            {!compactLabels && (
+              <span className="text-xs font-medium text-muted-foreground">
+                {t('series.selectCurrency')}
+              </span>
+            )}
             <input
               type="text"
               list="nbp-currency-codes"
@@ -206,9 +235,10 @@ export function NbpFilters({
               maxLength={3}
               aria-label={t('series.selectCurrency')}
               className={cn(
-                'w-24 rounded-md border border-border bg-background px-3 py-2 text-sm font-mono uppercase',
+                'rounded-md border border-border bg-background px-3 py-2 text-sm font-mono uppercase',
                 'placeholder:text-muted-foreground',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                compactCurrency ? 'w-16' : 'w-24',
               )}
             />
             {availableCodes.length > 0 && (
@@ -218,55 +248,135 @@ export function NbpFilters({
                 ))}
               </datalist>
             )}
-          </label>
+          </div>
 
           {/* Start date */}
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">
-              {t('filters.startDate')}
-            </span>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => onStartDateChange(e.target.value)}
-              aria-label={t('filters.startDate')}
-              className={cn(
-                'rounded-md border border-border bg-background px-3 py-2 text-sm',
-                'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          {compactDate ? (
+            <div className="flex flex-col items-center gap-0.5">
+              {!compactLabels && (
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t('filters.startDate')}
+                </span>
               )}
-            />
-          </label>
+              <button
+                type="button"
+                aria-label={t('filters.startDate')}
+                onClick={() => startInputRef.current?.showPicker()}
+                className={cn(
+                  'rounded-md border border-border p-2 text-muted-foreground transition-colors',
+                  'hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  startDate && 'border-primary text-primary',
+                )}
+              >
+                <Calendar size={16} aria-hidden="true" />
+              </button>
+              <input
+                ref={startInputRef}
+                type="date"
+                value={startDate}
+                onChange={(e) => onStartDateChange(e.target.value)}
+                aria-label={t('filters.startDate')}
+                className="sr-only"
+              />
+              {startDate && (
+                <span className="text-[10px] text-muted-foreground">{startDate.slice(5)}</span>
+              )}
+            </div>
+          ) : (
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted-foreground">
+                {t('filters.startDate')}
+              </span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => onStartDateChange(e.target.value)}
+                aria-label={t('filters.startDate')}
+                className={cn(
+                  'rounded-md border border-border bg-background px-3 py-2 text-sm',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                )}
+              />
+            </label>
+          )}
 
           {/* End date */}
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">
-              {t('filters.endDate')}
-            </span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => onEndDateChange(e.target.value)}
-              aria-label={t('filters.endDate')}
-              className={cn(
-                'rounded-md border border-border bg-background px-3 py-2 text-sm',
-                'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          {compactDate ? (
+            <div className="flex flex-col items-center gap-0.5">
+              {!compactLabels && (
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t('filters.endDate')}
+                </span>
               )}
-            />
-          </label>
+              <button
+                type="button"
+                aria-label={t('filters.endDate')}
+                onClick={() => endInputRef.current?.showPicker()}
+                className={cn(
+                  'rounded-md border border-border p-2 text-muted-foreground transition-colors',
+                  'hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  endDate && 'border-primary text-primary',
+                )}
+              >
+                <Calendar size={16} aria-hidden="true" />
+              </button>
+              <input
+                ref={endInputRef}
+                type="date"
+                value={endDate}
+                onChange={(e) => onEndDateChange(e.target.value)}
+                aria-label={t('filters.endDate')}
+                className="sr-only"
+              />
+              {endDate && (
+                <span className="text-[10px] text-muted-foreground">{endDate.slice(5)}</span>
+              )}
+            </div>
+          ) : (
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted-foreground">
+                {t('filters.endDate')}
+              </span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => onEndDateChange(e.target.value)}
+                aria-label={t('filters.endDate')}
+                className={cn(
+                  'rounded-md border border-border bg-background px-3 py-2 text-sm',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                )}
+              />
+            </label>
+          )}
 
           {/* Reset button */}
-          <button
-            type="button"
-            onClick={onClear}
-            className={cn(
-              'flex items-center gap-2 rounded-md border border-border px-3 py-2',
-              'text-sm text-muted-foreground transition-colors hover:text-foreground',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-            )}
-          >
-            <X size={14} aria-hidden="true" />
-            {t('filters.clear')}
-          </button>
+          {compactReset ? (
+            <button
+              type="button"
+              aria-label={t('filters.clear')}
+              onClick={onClear}
+              className={cn(
+                'rounded-md border border-border p-2 text-muted-foreground transition-colors',
+                'hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              )}
+            >
+              <X size={16} aria-hidden="true" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onClear}
+              className={cn(
+                'flex items-center gap-2 rounded-md border border-border px-3 py-2',
+                'text-sm text-muted-foreground transition-colors hover:text-foreground',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              )}
+            >
+              <X size={14} aria-hidden="true" />
+              {t('filters.clear')}
+            </button>
+          )}
         </div>
       )}
 
@@ -280,48 +390,128 @@ export function NbpFilters({
       {/* ── Date range — gold (always visible) ── */}
       {tab === 'gold' && (
         <div className="flex flex-wrap items-end gap-3">
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">
-              {t('filters.startDate')}
-            </span>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => onStartDateChange(e.target.value)}
-              aria-label={t('filters.startDate')}
-              className={cn(
-                'rounded-md border border-border bg-background px-3 py-2 text-sm',
-                'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          {compactDate ? (
+            <div className="flex flex-col items-center gap-0.5">
+              {!compactLabels && (
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t('filters.startDate')}
+                </span>
               )}
-            />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">
-              {t('filters.endDate')}
-            </span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => onEndDateChange(e.target.value)}
-              aria-label={t('filters.endDate')}
-              className={cn(
-                'rounded-md border border-border bg-background px-3 py-2 text-sm',
-                'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              <button
+                type="button"
+                aria-label={t('filters.startDate')}
+                onClick={() => startInputRef.current?.showPicker()}
+                className={cn(
+                  'rounded-md border border-border p-2 text-muted-foreground transition-colors',
+                  'hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  startDate && 'border-primary text-primary',
+                )}
+              >
+                <Calendar size={16} aria-hidden="true" />
+              </button>
+              <input
+                ref={startInputRef}
+                type="date"
+                value={startDate}
+                onChange={(e) => onStartDateChange(e.target.value)}
+                aria-label={t('filters.startDate')}
+                className="sr-only"
+              />
+              {startDate && (
+                <span className="text-[10px] text-muted-foreground">{startDate.slice(5)}</span>
               )}
-            />
-          </label>
-          <button
-            type="button"
-            onClick={onClear}
-            className={cn(
-              'flex items-center gap-2 rounded-md border border-border px-3 py-2',
-              'text-sm text-muted-foreground transition-colors hover:text-foreground',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-            )}
-          >
-            <X size={14} aria-hidden="true" />
-            {t('filters.clear')}
-          </button>
+            </div>
+          ) : (
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted-foreground">
+                {t('filters.startDate')}
+              </span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => onStartDateChange(e.target.value)}
+                aria-label={t('filters.startDate')}
+                className={cn(
+                  'rounded-md border border-border bg-background px-3 py-2 text-sm',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                )}
+              />
+            </label>
+          )}
+          {compactDate ? (
+            <div className="flex flex-col items-center gap-0.5">
+              {!compactLabels && (
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t('filters.endDate')}
+                </span>
+              )}
+              <button
+                type="button"
+                aria-label={t('filters.endDate')}
+                onClick={() => endInputRef.current?.showPicker()}
+                className={cn(
+                  'rounded-md border border-border p-2 text-muted-foreground transition-colors',
+                  'hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  endDate && 'border-primary text-primary',
+                )}
+              >
+                <Calendar size={16} aria-hidden="true" />
+              </button>
+              <input
+                ref={endInputRef}
+                type="date"
+                value={endDate}
+                onChange={(e) => onEndDateChange(e.target.value)}
+                aria-label={t('filters.endDate')}
+                className="sr-only"
+              />
+              {endDate && (
+                <span className="text-[10px] text-muted-foreground">{endDate.slice(5)}</span>
+              )}
+            </div>
+          ) : (
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted-foreground">
+                {t('filters.endDate')}
+              </span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => onEndDateChange(e.target.value)}
+                aria-label={t('filters.endDate')}
+                className={cn(
+                  'rounded-md border border-border bg-background px-3 py-2 text-sm',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                )}
+              />
+            </label>
+          )}
+          {compactReset ? (
+            <button
+              type="button"
+              aria-label={t('filters.clear')}
+              onClick={onClear}
+              className={cn(
+                'rounded-md border border-border p-2 text-muted-foreground transition-colors',
+                'hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              )}
+            >
+              <X size={16} aria-hidden="true" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onClear}
+              className={cn(
+                'flex items-center gap-2 rounded-md border border-border px-3 py-2',
+                'text-sm text-muted-foreground transition-colors hover:text-foreground',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              )}
+            >
+              <X size={14} aria-hidden="true" />
+              {t('filters.clear')}
+            </button>
+          )}
         </div>
       )}
     </div>

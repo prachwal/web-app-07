@@ -19,7 +19,6 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  Legend,
 } from 'recharts';
 import { cn } from '@/lib/utils';
 import type { NbpTab } from '@/store/api/nbpApi';
@@ -48,6 +47,8 @@ export interface NbpChartProps {
   tab: NbpTab;
   /** Currency code shown in ARIA label (e.g. "USD"). Empty for gold. */
   currency?: string;
+  /** Controls horizontal alignment of the chart title. Defaults to `'left'`. */
+  titleAlign?: 'left' | 'center' | 'right';
 }
 
 /**
@@ -61,7 +62,7 @@ export interface NbpChartProps {
  * @param props - {@link NbpChartProps}
  * @returns The chart element or a loading/empty state
  */
-export function NbpChart({ data, isLoading, tab, currency = '' }: NbpChartProps): React.JSX.Element {
+export function NbpChart({ data, isLoading, tab, currency = '', titleAlign }: NbpChartProps): React.JSX.Element {
   const { t } = useTranslation('nbp');
   const reducedMotion = useReducedMotion();
   const animate = !reducedMotion;
@@ -137,6 +138,8 @@ export function NbpChart({ data, isLoading, tab, currency = '' }: NbpChartProps)
   /* ── date axis formatter — shorten to MM-DD ── */
   const dateTickFormatter = (value: string) => value.slice(5);
 
+  const titleAlignClass = ({ left: 'text-left', center: 'text-center', right: 'text-right' } as const)[titleAlign ?? 'left'];
+
   return (
     <div
       role="img"
@@ -146,7 +149,7 @@ export function NbpChart({ data, isLoading, tab, currency = '' }: NbpChartProps)
         'transition-opacity duration-150',
       )}
     >
-      <p className="mb-3 text-sm font-medium text-foreground">{t('chart.heading')}</p>
+      <p className={cn('mb-2 text-sm font-medium text-foreground', titleAlignClass)}>{t('chart.heading')}</p>
 
       {/* Y-axis title rendered in HTML to avoid SVG coordinate-system positioning issues */}
       <div className="flex items-stretch gap-1">
@@ -159,95 +162,121 @@ export function NbpChart({ data, isLoading, tab, currency = '' }: NbpChartProps)
           </span>
         </div>
 
-        <div className="h-56 w-full sm:h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 4, right: 20, bottom: 28, left: 4 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-              <XAxis
-                dataKey="date"
-                tickFormatter={dateTickFormatter}
-                tick={{ fontSize: 10, fill: axisColor }}
-                axisLine={{ stroke: gridColor }}
-                tickLine={false}
-                label={{
-                  value: t('chart.axisDate'),
-                  position: 'insideBottom',
-                  offset: -10,
-                  style: { fontSize: 10, fill: axisColor },
-                }}
-              />
-              <YAxis
-                domain={yDomain}
-                tickFormatter={formatAxisNumber}
-                tick={{ fontSize: 10, fill: axisColor }}
-                axisLine={{ stroke: gridColor }}
-                tickLine={false}
-                width={52}
-              />
-              <Tooltip
-                contentStyle={{
-                  background: tooltipBg,
-                  border: `1px solid ${gridColor}`,
-                  borderRadius: '6px',
-                  fontSize: 12,
-                  color: tooltipFg,
-                }}
-              />
-              <Legend
-                wrapperStyle={{ fontSize: 12, color: axisColor }}
-              />
-
-              {/* Table A / B — single mid line */}
-              {(tab === 'A' || tab === 'B') && (
-                <Line
-                  type="monotone"
-                  dataKey="mid"
-                  name={t('chart.mid')}
-                  stroke={COLOR_MID}
-                  strokeWidth={2}
-                  dot={false}
-                  isAnimationActive={animate}
+        <div className="min-w-0 flex-1">
+          <div className="h-56 w-full sm:h-72" style={{ minWidth: 0, minHeight: 0 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={data} margin={{ top: 8, right: 12, bottom: 4, left: 2 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={dateTickFormatter}
+                  tick={{ fontSize: 10, fill: axisColor }}
+                  axisLine={{ stroke: gridColor }}
+                  tickLine={false}
                 />
-              )}
+                <YAxis
+                  domain={yDomain}
+                  tickFormatter={formatAxisNumber}
+                  tick={{ fontSize: 10, fill: axisColor }}
+                  axisLine={{ stroke: gridColor }}
+                  tickLine={false}
+                  width={44}
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: tooltipBg,
+                    border: `1px solid ${gridColor}`,
+                    borderRadius: '6px',
+                    fontSize: 12,
+                    color: tooltipFg,
+                  }}
+                />
 
-              {/* Table C — bid + ask lines */}
-              {tab === 'C' && (
-                <>
+                {/* Table A / B — single mid line */}
+                {(tab === 'A' || tab === 'B') && (
                   <Line
                     type="monotone"
-                    dataKey="bid"
-                    name={t('chart.bid')}
-                    stroke={COLOR_BID}
+                    dataKey="mid"
+                    name={t('chart.mid')}
+                    stroke={COLOR_MID}
                     strokeWidth={2}
                     dot={false}
                     isAnimationActive={animate}
                   />
+                )}
+
+                {/* Table C — bid + ask lines */}
+                {tab === 'C' && (
+                  <>
+                    <Line
+                      type="monotone"
+                      dataKey="bid"
+                      name={t('chart.bid')}
+                      stroke={COLOR_BID}
+                      strokeWidth={2}
+                      dot={false}
+                      isAnimationActive={animate}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="ask"
+                      name={t('chart.ask')}
+                      stroke={COLOR_ASK}
+                      strokeWidth={2}
+                      dot={false}
+                      isAnimationActive={animate}
+                    />
+                  </>
+                )}
+
+                {/* Gold — single price line */}
+                {tab === 'gold' && (
                   <Line
                     type="monotone"
-                    dataKey="ask"
-                    name={t('chart.ask')}
-                    stroke={COLOR_ASK}
+                    dataKey="cena"
+                    name={t('chart.axisGold')}
+                    stroke={COLOR_GOLD}
                     strokeWidth={2}
                     dot={false}
                     isAnimationActive={animate}
                   />
-                </>
-              )}
+                )}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
 
-              {/* Gold — single price line */}
-              {tab === 'gold' && (
-                <Line
-                  type="monotone"
-                  dataKey="cena"
-                  name={t('chart.axisGold')}
-                  stroke={COLOR_GOLD}
-                  strokeWidth={2}
-                  dot={false}
-                  isAnimationActive={animate}
-                />
-              )}
-            </LineChart>
-          </ResponsiveContainer>
+          {/* HTML legend — below chart, offset by YAxis width to align with plot area */}
+          <div className="ml-[44px] mt-1 flex flex-wrap gap-x-4 gap-y-0.5" aria-hidden="true">
+            {(tab === 'A' || tab === 'B') && (
+              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <span className="inline-block h-2 w-4 rounded-sm" style={{ background: COLOR_MID }} />
+                {t('chart.mid')}
+              </span>
+            )}
+            {tab === 'C' && (
+              <>
+                <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <span className="inline-block h-2 w-4 rounded-sm" style={{ background: COLOR_BID }} />
+                  {t('chart.bid')}
+                </span>
+                <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <span className="inline-block h-2 w-4 rounded-sm" style={{ background: COLOR_ASK }} />
+                  {t('chart.ask')}
+                </span>
+              </>
+            )}
+            {tab === 'gold' && (
+              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <span className="inline-block h-2 w-4 rounded-sm" style={{ background: COLOR_GOLD }} />
+                {t('chart.axisGold')}
+              </span>
+            )}
+          </div>
+
+          {/* X-axis date label */}
+          <p className="ml-[44px] mt-0.5 text-center text-[10px] text-muted-foreground">
+            {t('chart.axisDate')}
+          </p>
         </div>
       </div>
     </div>
