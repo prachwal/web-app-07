@@ -40,17 +40,23 @@ export default tseslint.config(
     plugins: {
       'react-hooks': reactHooksPlugin,
     },
-    rules: reactHooksPlugin.configs['recommended-latest']?.rules ?? reactHooksPlugin.configs.recommended?.rules ?? {},
+    rules:
+      reactHooksPlugin.configs['recommended-latest']?.rules ??
+      reactHooksPlugin.configs.recommended?.rules ??
+      {},
   },
 
   // Allow _-prefixed unused variables (conventional "intentionally unused")
   {
     rules: {
-      '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_',
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 

@@ -21,8 +21,7 @@ export function createTestStore() {
       locale: localeReducer,
       [baseApi.reducerPath]: baseApi.reducer,
     },
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(baseApi.middleware),
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
   });
 }
 
@@ -39,13 +38,15 @@ interface TestProviderProps extends PropsWithChildren {
  * @param props - Provider props including optional store and initial path
  * @returns Wrapped children with all required providers
  */
-function TestProviders({ children, store, initialPath = '/' }: TestProviderProps): React.JSX.Element {
+function TestProviders({
+  children,
+  store,
+  initialPath = '/',
+}: TestProviderProps): React.JSX.Element {
   const testStore = store ?? createTestStore();
   return (
     <Provider store={testStore}>
-      <MemoryRouter initialEntries={[initialPath]}>
-        {children}
-      </MemoryRouter>
+      <MemoryRouter initialEntries={[initialPath]}>{children}</MemoryRouter>
     </Provider>
   );
 }

@@ -10,10 +10,7 @@ export function Footer(): React.JSX.Element {
   const { t } = useTranslation('common');
 
   return (
-    <footer
-      role="contentinfo"
-      className={cn('border-t border-border', 'bg-background py-8')}
-    >
+    <footer role="contentinfo" className={cn('border-t border-border', 'bg-background py-8')}>
       <div className="mx-auto max-w-6xl px-4 text-center sm:px-6 lg:px-8">
         <p className="text-sm text-muted-foreground">
           © {new Date().getFullYear()} DemoApp.{' '}

@@ -26,8 +26,7 @@ export function ThemeProvider(): null {
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
       applyTheme(mq.matches ? 'dark' : 'light');
 
-      const handler = (e: MediaQueryListEvent) =>
-        applyTheme(e.matches ? 'dark' : 'light');
+      const handler = (e: MediaQueryListEvent) => applyTheme(e.matches ? 'dark' : 'light');
       mq.addEventListener('change', handler);
       return () => mq.removeEventListener('change', handler);
     }

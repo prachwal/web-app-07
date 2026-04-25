@@ -9,23 +9,23 @@ Package manager: **pnpm** (always, never npm/yarn).
 
 ## Stack
 
-| Layer | Package | Version |
-|-------|---------|---------|
-| UI | react + react-dom | 19.x |
-| Types | typescript | 6.x |
-| Build | vite + @vitejs/plugin-react | 8.x |
-| Styling | tailwindcss + @tailwindcss/vite | 4.x |
-| Components | shadcn/ui (new-york style, copied into src/components/ui/) | — |
-| State | @reduxjs/toolkit + react-redux | 2.x / 9.x |
-| Routing | react-router | 7.x |
-| i18n | i18next + react-i18next | 26.x / 17.x |
-| Forms | react-hook-form + zod + @hookform/resolvers | — |
-| Animation | motion | — |
-| Class utils | clsx + tailwind-merge | — |
-| Icons | lucide-react | — |
-| Tests | vitest + @vitest/coverage-v8 + @testing-library/react | 4.x |
-| Docs | typedoc + typedoc-plugin-markdown | 0.28.x |
-| Lint | eslint 10 + typescript-eslint 8 + jsx-a11y + tsdoc | — |
+| Layer       | Package                                                    | Version     |
+| ----------- | ---------------------------------------------------------- | ----------- |
+| UI          | react + react-dom                                          | 19.x        |
+| Types       | typescript                                                 | 6.x         |
+| Build       | vite + @vitejs/plugin-react                                | 8.x         |
+| Styling     | tailwindcss + @tailwindcss/vite                            | 4.x         |
+| Components  | shadcn/ui (new-york style, copied into src/components/ui/) | —           |
+| State       | @reduxjs/toolkit + react-redux                             | 2.x / 9.x   |
+| Routing     | react-router                                               | 7.x         |
+| i18n        | i18next + react-i18next                                    | 26.x / 17.x |
+| Forms       | react-hook-form + zod + @hookform/resolvers                | —           |
+| Animation   | motion                                                     | —           |
+| Class utils | clsx + tailwind-merge                                      | —           |
+| Icons       | lucide-react                                               | —           |
+| Tests       | vitest + @vitest/coverage-v8 + @testing-library/react      | 4.x         |
+| Docs        | typedoc + typedoc-plugin-markdown                          | 0.28.x      |
+| Lint        | eslint 10 + typescript-eslint 8 + jsx-a11y + tsdoc         | —           |
 
 ## Commands
 

@@ -67,7 +67,11 @@ export function Header(): React.JSX.Element {
 
         <div className="flex items-center gap-2" role="toolbar" aria-label="Site controls">
           {/* Theme toggle */}
-          <div className="flex rounded-lg border border-border p-0.5" role="group" aria-label={t('theme.toggle')}>
+          <div
+            className="flex rounded-lg border border-border p-0.5"
+            role="group"
+            aria-label={t('theme.toggle')}
+          >
             {themeOptions.map(({ mode, label, Icon }) => (
               <button
                 key={mode}
@@ -88,7 +92,11 @@ export function Header(): React.JSX.Element {
           </div>
 
           {/* Language toggle */}
-          <div className="flex rounded-lg border border-border p-0.5" role="group" aria-label={t('language.toggle')}>
+          <div
+            className="flex rounded-lg border border-border p-0.5"
+            role="group"
+            aria-label={t('language.toggle')}
+          >
             {localeOptions.map(({ locale, label }) => (
               <button
                 key={locale}

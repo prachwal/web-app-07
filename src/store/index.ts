@@ -14,8 +14,7 @@ export const store = configureStore({
     locale: localeReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(baseApi.middleware),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
 });
 
 /** Inferred root state type from the store. */
@@ -36,5 +35,4 @@ export const useAppDispatch = () => useDispatch<AppDispatch>();
  *
  * @param selector - Selector function receiving {@link RootState}
  */
-export const useAppSelector = <T>(selector: (state: RootState) => T): T =>
-  useSelector(selector);
+export const useAppSelector = <T>(selector: (state: RootState) => T): T => useSelector(selector);

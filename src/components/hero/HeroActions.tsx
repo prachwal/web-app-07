@@ -93,7 +93,9 @@ export function HeroActions(): React.JSX.Element {
           </p>
         ) : (
           <form
-            onSubmit={(e) => { void handleSubmit(onSubmit)(e); }}
+            onSubmit={(e) => {
+              void handleSubmit(onSubmit)(e);
+            }}
             noValidate
             aria-label="Email notification signup"
           >

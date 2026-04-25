@@ -20,12 +20,7 @@ export function HeroHeading(): React.JSX.Element {
   };
 
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={variants}
-      className="space-y-4"
-    >
+    <motion.div initial="hidden" animate="visible" variants={variants} className="space-y-4">
       <span
         className={cn(
           'inline-block rounded-full border border-border',
@@ -43,12 +38,7 @@ export function HeroHeading(): React.JSX.Element {
       >
         {t('heading')}
       </h1>
-      <p
-        className={cn(
-          'max-w-2xl text-lg text-muted-foreground',
-          'sm:text-xl',
-        )}
-      >
+      <p className={cn('max-w-2xl text-lg text-muted-foreground', 'sm:text-xl')}>
         {t('subheading')}
       </p>
     </motion.div>

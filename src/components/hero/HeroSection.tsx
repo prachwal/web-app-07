@@ -36,10 +36,7 @@ export function HeroSection(): React.JSX.Element {
   return (
     <section
       aria-labelledby="hero-heading"
-      className={cn(
-        'relative overflow-hidden',
-        'bg-background py-20 sm:py-28 lg:py-36',
-      )}
+      className={cn('relative overflow-hidden', 'bg-background py-20 sm:py-28 lg:py-36')}
     >
       {/* Decorative background gradient */}
       <div
@@ -59,11 +56,7 @@ export function HeroSection(): React.JSX.Element {
         </div>
 
         {/* Feature cards */}
-        <div
-          role="list"
-          aria-label={t('features.title')}
-          className="grid gap-4 sm:grid-cols-3"
-        >
+        <div role="list" aria-label={t('features.title')} className="grid gap-4 sm:grid-cols-3">
           {features.map((feature, index) => {
             const Icon = featureIcons[index] ?? Layers;
             return (
