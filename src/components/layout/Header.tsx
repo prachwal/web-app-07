@@ -1,20 +1,31 @@
+import { Link, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Moon, Sun, Monitor } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setTheme, type ThemeMode } from '@/store/slices/themeSlice';
 import { setLocale, type Locale } from '@/store/slices/localeSlice';
+import { ROUTES } from '@/routes/routes';
 import type { LucideIcon } from 'lucide-react';
+
+const NAV_ITEMS = [
+  { key: 'home', to: ROUTES.HOME },
+  { key: 'about', to: ROUTES.ABOUT },
+  { key: 'contact', to: ROUTES.CONTACT },
+  { key: 'settings', to: ROUTES.SETTINGS },
+] as const;
 
 /**
  * Application header with navigation, theme toggle, and language switcher.
  * Uses `role="banner"` landmark and keyboard-accessible controls.
+ * Active route is highlighted with `aria-current="page"`.
  *
  * @returns The site header element
  */
 export function Header(): React.JSX.Element {
   const { t } = useTranslation('common');
   const dispatch = useAppDispatch();
+  const location = useLocation();
   const currentTheme = useAppSelector((state) => state.theme.mode);
   const currentLocale = useAppSelector((state) => state.locale.locale);
 
@@ -38,30 +49,35 @@ export function Header(): React.JSX.Element {
       )}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <a
-          href="/"
+        <Link
+          to={ROUTES.HOME}
           className="text-lg font-bold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           aria-label="Demo App — go to home"
         >
           DemoApp
-        </a>
+        </Link>
 
         <nav role="navigation" aria-label={t('a11y.openMenu')}>
           <ul className="hidden gap-6 sm:flex">
-            {(['home', 'about', 'contact'] as const).map((key) => (
-              <li key={key}>
-                <a
-                  href={key === 'home' ? '/' : `/${key}`}
-                  className={cn(
-                    'text-sm font-medium text-muted-foreground',
-                    'hover:text-foreground transition-colors',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring rounded-sm',
-                  )}
-                >
-                  {t(`nav.${key}`)}
-                </a>
-              </li>
-            ))}
+            {NAV_ITEMS.map(({ key, to }) => {
+              const isActive =
+                to === ROUTES.HOME ? location.pathname === '/' : location.pathname.startsWith(to);
+              return (
+                <li key={key}>
+                  <Link
+                    to={to}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={cn(
+                      'text-sm font-medium transition-colors',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring rounded-sm',
+                      isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
+                    )}
+                  >
+                    {t(`nav.${key}`)}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
 

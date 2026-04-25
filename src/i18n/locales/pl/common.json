@@ -2,7 +2,8 @@
   "nav": {
     "home": "Strona główna",
     "about": "O nas",
-    "contact": "Kontakt"
+    "contact": "Kontakt",
+    "settings": "Ustawienia"
   },
   "theme": {
     "toggle": "Przełącz motyw",

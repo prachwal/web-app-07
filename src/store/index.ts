@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from 'react-redux';
 import themeReducer from './slices/themeSlice';
 import localeReducer from './slices/localeSlice';
+import notificationsReducer from './slices/notificationsSlice';
 import { baseApi } from './api/baseApi';
 
 /**
@@ -12,6 +13,7 @@ export const store = configureStore({
   reducer: {
     theme: themeReducer,
     locale: localeReducer,
+    notifications: notificationsReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),

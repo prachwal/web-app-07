@@ -1,0 +1,17 @@
+{
+  "title": "Ustawienia",
+  "appearance": {
+    "heading": "Wygląd",
+    "description": "Wybierz preferowany schemat kolorów."
+  },
+  "language": {
+    "heading": "Język",
+    "description": "Wybierz język wyświetlania aplikacji."
+  },
+  "notifications": {
+    "heading": "Powiadomienia",
+    "description": "Przetestuj system powiadomień.",
+    "testButton": "Wyślij testowe powiadomienie",
+    "testMessage": "To jest testowe powiadomienie."
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "title": "Settings",
+  "appearance": {
+    "heading": "Appearance",
+    "description": "Choose your preferred color scheme."
+  },
+  "language": {
+    "heading": "Language",
+    "description": "Choose the display language for the application."
+  },
+  "notifications": {
+    "heading": "Notifications",
+    "description": "Test the notification system.",
+    "testButton": "Send test notification",
+    "testMessage": "This is a test notification."
+  }
+}

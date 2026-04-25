@@ -1,0 +1,21 @@
+{
+  "title": "Kontakt",
+  "subtitle": "Masz pytanie lub chcesz z nami współpracować? Napisz do nas.",
+  "form": {
+    "name": "Imię i nazwisko",
+    "namePlaceholder": "Twoje imię i nazwisko",
+    "email": "Email",
+    "emailPlaceholder": "twoj@email.com",
+    "message": "Wiadomość",
+    "messagePlaceholder": "W czym możemy Ci pomóc?",
+    "submit": "Wyślij wiadomość",
+    "submitting": "Wysyłanie…"
+  },
+  "validation": {
+    "nameMin": "Imię musi mieć co najmniej 2 znaki",
+    "emailInvalid": "Podaj prawidłowy adres email",
+    "messageMin": "Wiadomość musi mieć co najmniej 10 znaków"
+  },
+  "sent": "Twoja wiadomość została wysłana! Odpiszemy wkrótce.",
+  "error": "Coś poszło nie tak. Spróbuj ponownie."
+}

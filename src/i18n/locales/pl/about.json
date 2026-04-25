@@ -1,0 +1,23 @@
+{
+  "title": "O nas",
+  "subtitle": "Tworzymy świetne oprogramowanie, komponent po komponencie.",
+  "mission": {
+    "heading": "Nasza misja",
+    "body": "Tworzymy dostępne, wydajne i łatwe w utrzymaniu aplikacje webowe przy użyciu nowoczesnych narzędzi open-source. Jakość i doświadczenie dewelopera kierują każdą naszą decyzją."
+  },
+  "team": {
+    "heading": "Zespół",
+    "member1": {
+      "name": "Alice Kowalski",
+      "role": "Główny inżynier"
+    },
+    "member2": {
+      "name": "Bob Nowak",
+      "role": "Projektant UI/UX"
+    },
+    "member3": {
+      "name": "Carol Wiśniewska",
+      "role": "Specjalistka ds. dostępności"
+    }
+  }
+}

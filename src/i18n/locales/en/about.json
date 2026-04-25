@@ -1,0 +1,23 @@
+{
+  "title": "About Us",
+  "subtitle": "Building great software, one component at a time.",
+  "mission": {
+    "heading": "Our Mission",
+    "body": "We create accessible, performant, and maintainable web applications using modern open-source tools. Quality and developer experience drive every decision we make."
+  },
+  "team": {
+    "heading": "Team",
+    "member1": {
+      "name": "Alice Kowalski",
+      "role": "Lead Engineer"
+    },
+    "member2": {
+      "name": "Bob Nowak",
+      "role": "UI/UX Designer"
+    },
+    "member3": {
+      "name": "Carol Wiśniewska",
+      "role": "Accessibility Specialist"
+    }
+  }
+}

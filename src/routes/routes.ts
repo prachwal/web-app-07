@@ -1,6 +1,9 @@
 /** Application route path constants. */
 export const ROUTES = {
   HOME: '/',
+  ABOUT: '/about',
+  CONTACT: '/contact',
+  SETTINGS: '/settings',
   NOT_FOUND: '*',
 } as const;
 

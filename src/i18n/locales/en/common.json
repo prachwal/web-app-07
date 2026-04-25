@@ -2,7 +2,8 @@
   "nav": {
     "home": "Home",
     "about": "About",
-    "contact": "Contact"
+    "contact": "Contact",
+    "settings": "Settings"
   },
   "theme": {
     "toggle": "Toggle theme",

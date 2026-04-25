@@ -81,3 +81,8 @@ artifacts/            gitignored — coverage/ and docs/
 - **Motion**: wrap animated elements with `useReducedMotion()` guard
 - **TypeDoc**: all exported functions/components require TSDoc comments (enforced by eslint-plugin-tsdoc)
 - **Artifacts**: `/artifacts/` is gitignored — coverage reports and TypeDoc output live here
+
+## Subagent model
+
+Use **claude-haiku-4-5** (model: `haiku`) for Agent tool calls (Explore, Plan, code-reviewer)
+unless the task explicitly requires opus/sonnet reasoning.
